@@ -125,7 +125,7 @@ gdt_entry gdt[GDT_COUNT] = {
     //codigo  lvl 0
     [GDT_IDX_CDE_LVL_0] = (gdt_entry) {
         (unsigned short)    0x6f00,         /* limit[0:15]  */
-        (unsigned short)    0x0000,         /* base[0:15]   */
+        (unsigned short)    0xFFFF,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x0A,           /* type         = CODIGO*/
         (unsigned char)     0x01,           /* s            = NO SISTEMA*/
@@ -141,7 +141,7 @@ gdt_entry gdt[GDT_COUNT] = {
     //codigo lvl 3
     [GDT_IDX_CDE_LVL_3] = (gdt_entry) {
         (unsigned short)    0x6f00,         /* limit[0:15]  */
-        (unsigned short)    0x0000,         /* base[0:15]   */
+        (unsigned short)    0xFFFF,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x0A,           /* type         = CODIGO*/
         (unsigned char)     0x01,           /* s            */
@@ -157,7 +157,7 @@ gdt_entry gdt[GDT_COUNT] = {
     //datos lvl 0
     [GDT_IDX_DATA_LVL_0] = (gdt_entry) {
         (unsigned short)    0x6f00,         /* limit[0:15]  */
-        (unsigned short)    0x0000,         /* base[0:15]   */
+        (unsigned short)    0xFFFF,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x02,           /* type         */
         (unsigned char)     0x01,           /* s            */
@@ -173,7 +173,7 @@ gdt_entry gdt[GDT_COUNT] = {
     //datos lvl 3
     [GDT_IDX_DATA_LVL_3] = (gdt_entry) {
         (unsigned short)    0x6f00,         /* limit[0:15]  */
-        (unsigned short)    0x0000,         /* base[0:15]   */
+        (unsigned short)    0xFFFF,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x02,           /* type         */
         (unsigned char)     0x01,           /* s            */

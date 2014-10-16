@@ -1,0 +1,1 @@
+./configure --enable-disasm --disable-docbook --prefix=/home/franco/bochs-2.6.2/ --enable-gdb-stub
