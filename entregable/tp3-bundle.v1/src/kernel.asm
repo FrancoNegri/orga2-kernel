@@ -10,7 +10,6 @@ global start
 
 
 ;; Saltear seccion de datos
-
 jmp start
 
 ;;
@@ -32,6 +31,8 @@ iniciando_mp_len equ    $ - iniciando_mp_msg
 BITS 16
 start:
     
+    ; Deshabilitar interrupciones
+    cli    
 
     ; Cambiar modo de video a 80 X 50
     mov ax, 0003h
@@ -39,9 +40,6 @@ start:
     xor bx, bx
     mov ax, 1112h
     int 10h ; load 8x8 font
-
-     ; Deshabilitar interrupciones
-    cli
 
     ; Imprimir mensaje de bienvenida
     imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
