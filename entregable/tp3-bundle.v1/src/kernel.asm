@@ -20,8 +20,8 @@ iniciando_mr_len equ    $ - iniciando_mr_msg
 iniciando_mp_msg db     'Iniciando kernel (Modo Protegido)...'
 iniciando_mp_len equ    $ - iniciando_mp_msg
 
-iniciando_GDT_msg db     'Cargando GDT...'
-iniciando_GDT_len equ    $ - iniciando_GDT_msg
+iniciando_vide_msg db   'Iniciando Pantalla...'
+iniciando_vide_len equ  $ - iniciando_vide_msg
 
 ok_msg db 'ok!'
 ok_len equ $ - ok_msg
@@ -66,7 +66,8 @@ start:
 
     ; Setear el bit PE del registro CR0
 
-    xchg bx,bx
+    ;xchg bx,bx     ;;;;;;;;;;;;;;;;;; DEBUG LINE;;;;;;;;;;;;;;;;;
+
     mov eax, CR0
     or eax, 1
     
@@ -81,21 +82,34 @@ start:
     ; Establecer selectores de segmentos
 BITS 32
 mp: 
-
     xor eax, eax
 
-    mov ax, 0x40
-    mov cs, ax  ; {Index: 8, gdt/ldt: 0, rpl = 0} code
-    
-    mov ax, 0x50
-    mov ds, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} data
-    mov fs, ax
-    
-    mov ax, 0x50
-    mov ss, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} stack
-    
+    ;mov ax, 0x40
+    ;mov cs, ax  ; {Index: 8, gdt/ldt: 0, rpl = 0} kernel code, se setea con jmp no es necesario
+
     mov ax, 0x48
-    mov es, ax  ; {Index: 9, gdt/ldt: 0, rpl = 3} data video    
+    mov es, ax  ; {Index: 9, gdt/ldt: 0, rpl = 3} App code
+
+    mov ax, 0x50
+    mov ds, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} kernel data
+    mov ss, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} kernel stack
+    
+    mov ax, 1011011b 
+    mov fs, ax ;{Index: 11, gdt/ldt: 0, rpl = 3} App data
+    
+    mov ax, 1100000b 
+    mov gs, ax ;{Index: 12, gdt/ldt: 0, rpl = 0} video data
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;Selector Map;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;           Sleector                                    LVL     ;
+    ;           cs      ->      Kernel code         ->      0       ;
+    ;           es      ->      App code            ->      3       ;
+    ;           ds      ->      Kernel Data         ->      0       ;
+    ;           ss      ->      Kernel Stak         ->      0       ;
+    ;           fs      ->      App data            ->      3       ;
+    ;           gs      ->      Video Data          ->      0       ;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ; Establecer la base de la pila
     
@@ -104,10 +118,26 @@ mp:
 
     ; Imprimir mensaje de bienvenida
 
-    imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 4, 5
+    imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
 
     ; Inicializar pantalla
-    
+
+    imprimir_texto_mp iniciando_vide_msg, iniciando_vide_len, 0x07,3,0
+
+    xor eax, eax
+    xor edi, edi
+    mov di, 0xa000 ;caracter nulo(00), fondo verde (A0)
+
+    ;xchg bx,bx
+
+init:
+    mov [gs:eax], di
+    add eax, 2
+    cmp eax, 8000 ;80 x 50 (tamaño de la pantalla) x 2 (tamaño de un pixel)
+    jnz init
+
+    imprimir_texto_mp ok_msg, ok_len, 0x07,0,0
+
     ; Inicializar el manejador de memoria
  
     ; Inicializar el directorio de paginas

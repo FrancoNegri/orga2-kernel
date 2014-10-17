@@ -203,7 +203,7 @@ gdt_entry gdt[GDT_COUNT] = {
     },
     //Video
     [GDT_IDX_VIDEO_LVL_0] = (gdt_entry) {
-        (unsigned short)    0x0D68,         /* limit[0:15]  */
+        (unsigned short)    0x0001,         /* limit[0:15]  tengo una pantalla de 80x50, para cada pixel necesito 2 bytes (RDI,caracter) = necesito 8000 bytes = necesito 7.8 KB = pido 2 segmentos de 4 KB*/ 
         (unsigned short)    0x8000,         /* base[0:15]   */
         (unsigned char)     0x0B,           /* base[23:16]  */
         (unsigned char)     0x02,           /* type         */
@@ -217,6 +217,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned char)     0x01,           /* g            */
         (unsigned char)     0x00,           /* base[31:24]  */
     }
+    /*cuidado con el solapamiento de segmentos, muy peligroso!*/
 };
 
 
