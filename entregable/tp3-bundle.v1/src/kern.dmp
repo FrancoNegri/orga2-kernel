@@ -1,0 +1,452 @@
+
+kernel.o:     file format elf32-i386
+
+
+Disassembly of section .text:
+
+00000000 <habilitando>:
+   0:	48                   	dec    %eax
+   1:	61                   	popa   
+   2:	62 69 6c             	bound  %ebp,0x6c(%ecx)
+   5:	69 74 61 6e 64 6f 20 	imul   $0x41206f64,0x6e(%ecx,%eiz,2),%esi
+   c:	41 
+   d:	32 30                	xor    (%eax),%dh
+   f:	2e                   	cs
+  10:	2e                   	cs
+  11:	2e                   	cs
+  12:	2e                   	cs
+  13:	2e                   	cs
+  14:	2e                   	cs
+  15:	2e                   	cs
+  16:	2e                   	cs
+
+00000017 <deshabilitando>:
+  17:	44                   	inc    %esp
+  18:	65                   	gs
+  19:	73 61                	jae    7c <..@2.sigo+0x16>
+  1b:	62 69 6c             	bound  %ebp,0x6c(%ecx)
+  1e:	69 74 61 6e 64 6f 20 	imul   $0x41206f64,0x6e(%ecx,%eiz,2),%esi
+  25:	41 
+  26:	32 30                	xor    (%eax),%dh
+  28:	2e                   	cs
+  29:	2e                   	cs
+  2a:	2e                   	cs
+  2b:	2e                   	cs
+  2c:	2e                   	cs
+  2d:	2e                   	cs
+
+0000002e <checkeando>:
+  2e:	43                   	inc    %ebx
+  2f:	68 65 63 6b 65       	push   $0x656b6365
+  34:	61                   	popa   
+  35:	6e                   	outsb  %ds:(%esi),(%dx)
+  36:	64 6f                	outsl  %fs:(%esi),(%dx)
+  38:	20 41 32             	and    %al,0x32(%ecx)
+  3b:	30 2e                	xor    %ch,(%esi)
+  3d:	2e                   	cs
+  3e:	2e                   	cs
+  3f:	2e                   	cs
+  40:	2e                   	cs
+  41:	2e                   	cs
+  42:	2e                   	cs
+  43:	2e                   	cs
+  44:	2e                   	cs
+
+00000045 <mensajeOK>:
+  45:	4f                   	dec    %edi
+  46:	4b                   	dec    %ebx
+  47:	21 46 41             	and    %eax,0x41(%esi)
+
+00000048 <mensajeFAIL>:
+  48:	46                   	inc    %esi
+  49:	41                   	inc    %ecx
+  4a:	4c                   	dec    %esp
+  4b:	4c                   	dec    %esp
+  4c:	4f                   	dec    %edi
+  4d:	21 00                	and    %eax,(%eax)
+
+0000004e <contadorlineas>:
+	...
+
+00000050 <deshabilitar_A20>:
+  50:	9c                   	pushf  
+  51:	60                   	pusha  
+  52:	60                   	pusha  
+  53:	06                   	push   %es
+  54:	b8 00 b8 8e c0       	mov    $0xc08eb800,%eax
+  59:	ba 00 00 83 fa       	mov    $0xfa830000,%edx
+  5e:	ff 74 05 83          	pushl  -0x7d(%ebp,%eax,1)
+  62:	06                   	push   %es
+  63:	4e                   	dec    %esi
+  64:	00 01                	add    %al,(%ecx)
+
+00000066 <..@2.sigo>:
+  66:	a1 4e 00 bb 50       	mov    0x50bb004e,%eax
+  6b:	00 f7                	add    %dh,%bh
+  6d:	e3 89                	jecxz  fffffff8 <..@14.ciclo_cadena+0xfffffc7f>
+  6f:	c3                   	ret    
+  70:	ba 00 00 01 d3       	mov    $0xd3010000,%edx
+  75:	d1 e3                	shl    %ebx
+  77:	bf 17 00 b9 17       	mov    $0x17b90017,%edi
+  7c:	00 b4 07 8a 05 26 89 	add    %dh,-0x76d9fa76(%edi,%eax,1)
+
+0000007f <..@2.ciclo_cadena>:
+  7f:	8a 05 26 89 07 83    	mov    0x83078926,%al
+  85:	c3                   	ret    
+  86:	02 47 e2             	add    -0x1e(%edi),%al
+  89:	f5                   	cmc    
+  8a:	07                   	pop    %es
+  8b:	61                   	popa   
+  8c:	e8 0d 01 b0 ad       	call   adb0019e <..@14.ciclo_cadena+0xadaffe25>
+  91:	e6 64                	out    %al,$0x64
+  93:	e8 06 01 b0 d0       	call   d0b0019e <..@14.ciclo_cadena+0xd0affe25>
+  98:	e6 64                	out    %al,$0x64
+  9a:	e8 06 01 e4 60       	call   60e401a5 <..@14.ciclo_cadena+0x60e3fe2c>
+  9f:	50                   	push   %eax
+  a0:	e8 f9 00 b0 d1       	call   d1b0019e <..@14.ciclo_cadena+0xd1affe25>
+  a5:	e6 64                	out    %al,$0x64
+  a7:	e8 f2 00 58 24       	call   2458019e <..@14.ciclo_cadena+0x2457fe25>
+  ac:	fd                   	std    
+  ad:	e6 60                	out    %al,$0x60
+  af:	e8 ea 00 b0 ae       	call   aeb0019e <..@14.ciclo_cadena+0xaeaffe25>
+  b4:	e6 64                	out    %al,$0x64
+  b6:	e8 e3 00 60 06       	call   660019e <..@14.ciclo_cadena+0x65ffe25>
+  bb:	b8 00 b8 8e c0       	mov    $0xc08eb800,%eax
+  c0:	ba ff ff 83 fa       	mov    $0xfa83ffff,%edx
+  c5:	ff 74 05 83          	pushl  -0x7d(%ebp,%eax,1)
+  c9:	06                   	push   %es
+  ca:	4e                   	dec    %esi
+  cb:	00 01                	add    %al,(%ecx)
+
+000000cd <..@3.sigo>:
+  cd:	a1 4e 00 bb 50       	mov    0x50bb004e,%eax
+  d2:	00 f7                	add    %dh,%bh
+  d4:	e3 89                	jecxz  5f <deshabilitar_A20+0xf>
+  d6:	c3                   	ret    
+  d7:	ba 17 00 01 d3       	mov    $0xd3010017,%edx
+  dc:	d1 e3                	shl    %ebx
+  de:	bf 45 00 b9 03       	mov    $0x3b90045,%edi
+  e3:	00 b4 0a 8a 05 26 89 	add    %dh,-0x76d9fa76(%edx,%ecx,1)
+
+000000e6 <..@3.ciclo_cadena>:
+  e6:	8a 05 26 89 07 83    	mov    0x83078926,%al
+  ec:	c3                   	ret    
+  ed:	02 47 e2             	add    -0x1e(%edi),%al
+  f0:	f5                   	cmc    
+  f1:	07                   	pop    %es
+  f2:	61                   	popa   
+  f3:	61                   	popa   
+  f4:	9d                   	popf   
+  f5:	c3                   	ret    
+
+000000f6 <habilitar_A20>:
+  f6:	9c                   	pushf  
+  f7:	60                   	pusha  
+  f8:	60                   	pusha  
+  f9:	06                   	push   %es
+  fa:	b8 00 b8 8e c0       	mov    $0xc08eb800,%eax
+  ff:	ba 00 00 83 fa       	mov    $0xfa830000,%edx
+ 104:	ff 74 05 83          	pushl  -0x7d(%ebp,%eax,1)
+ 108:	06                   	push   %es
+ 109:	4e                   	dec    %esi
+ 10a:	00 01                	add    %al,(%ecx)
+
+0000010c <..@4.sigo>:
+ 10c:	a1 4e 00 bb 50       	mov    0x50bb004e,%eax
+ 111:	00 f7                	add    %dh,%bh
+ 113:	e3 89                	jecxz  9e <..@2.ciclo_cadena+0x1f>
+ 115:	c3                   	ret    
+ 116:	ba 00 00 01 d3       	mov    $0xd3010000,%edx
+ 11b:	d1 e3                	shl    %ebx
+ 11d:	bf 00 00 b9 17       	mov    $0x17b90000,%edi
+ 122:	00 b4 07 8a 05 26 89 	add    %dh,-0x76d9fa76(%edi,%eax,1)
+
+00000125 <..@4.ciclo_cadena>:
+ 125:	8a 05 26 89 07 83    	mov    0x83078926,%al
+ 12b:	c3                   	ret    
+ 12c:	02 47 e2             	add    -0x1e(%edi),%al
+ 12f:	f5                   	cmc    
+ 130:	07                   	pop    %es
+ 131:	61                   	popa   
+ 132:	e8 67 00 b0 ad       	call   adb0019e <..@14.ciclo_cadena+0xadaffe25>
+ 137:	e6 64                	out    %al,$0x64
+ 139:	e8 60 00 b0 d0       	call   d0b0019e <..@14.ciclo_cadena+0xd0affe25>
+ 13e:	e6 64                	out    %al,$0x64
+ 140:	e8 60 00 e4 60       	call   60e401a5 <..@14.ciclo_cadena+0x60e3fe2c>
+ 145:	50                   	push   %eax
+ 146:	e8 53 00 b0 d1       	call   d1b0019e <..@14.ciclo_cadena+0xd1affe25>
+ 14b:	e6 64                	out    %al,$0x64
+ 14d:	e8 4c 00 58 0c       	call   c58019e <..@14.ciclo_cadena+0xc57fe25>
+ 152:	02 e6                	add    %dh,%ah
+ 154:	60                   	pusha  
+ 155:	e8 44 00 b0 ae       	call   aeb0019e <..@14.ciclo_cadena+0xaeaffe25>
+ 15a:	e6 64                	out    %al,$0x64
+ 15c:	e8 3d 00 60 06       	call   660019e <..@14.ciclo_cadena+0x65ffe25>
+ 161:	b8 00 b8 8e c0       	mov    $0xc08eb800,%eax
+ 166:	ba ff ff 83 fa       	mov    $0xfa83ffff,%edx
+ 16b:	ff 74 05 83          	pushl  -0x7d(%ebp,%eax,1)
+ 16f:	06                   	push   %es
+ 170:	4e                   	dec    %esi
+ 171:	00 01                	add    %al,(%ecx)
+
+00000173 <..@5.sigo>:
+ 173:	a1 4e 00 bb 50       	mov    0x50bb004e,%eax
+ 178:	00 f7                	add    %dh,%bh
+ 17a:	e3 89                	jecxz  105 <habilitar_A20+0xf>
+ 17c:	c3                   	ret    
+ 17d:	ba 17 00 01 d3       	mov    $0xd3010017,%edx
+ 182:	d1 e3                	shl    %ebx
+ 184:	bf 45 00 b9 03       	mov    $0x3b90045,%edi
+ 189:	00 b4 0a 8a 05 26 89 	add    %dh,-0x76d9fa76(%edx,%ecx,1)
+
+0000018c <..@5.ciclo_cadena>:
+ 18c:	8a 05 26 89 07 83    	mov    0x83078926,%al
+ 192:	c3                   	ret    
+ 193:	02 47 e2             	add    -0x1e(%edi),%al
+ 196:	f5                   	cmc    
+ 197:	07                   	pop    %es
+ 198:	61                   	popa   
+ 199:	61                   	popa   
+ 19a:	9d                   	popf   
+ 19b:	c3                   	ret    
+
+0000019c <a20wait>:
+ 19c:	e4 64                	in     $0x64,%al
+ 19e:	a8 02                	test   $0x2,%al
+ 1a0:	75 fa                	jne    19c <a20wait>
+ 1a2:	c3                   	ret    
+
+000001a3 <a20wait2>:
+ 1a3:	e4 64                	in     $0x64,%al
+ 1a5:	a8 01                	test   $0x1,%al
+ 1a7:	74 fa                	je     1a3 <a20wait2>
+ 1a9:	c3                   	ret    
+
+000001aa <checkear_A20>:
+ 1aa:	9c                   	pushf  
+ 1ab:	0f a0                	push   %fs
+ 1ad:	0f a8                	push   %gs
+ 1af:	57                   	push   %edi
+ 1b0:	56                   	push   %esi
+ 1b1:	60                   	pusha  
+ 1b2:	06                   	push   %es
+ 1b3:	b8 00 b8 8e c0       	mov    $0xc08eb800,%eax
+ 1b8:	ba 00 00 83 fa       	mov    $0xfa830000,%edx
+ 1bd:	ff 74 05 83          	pushl  -0x7d(%ebp,%eax,1)
+ 1c1:	06                   	push   %es
+ 1c2:	4e                   	dec    %esi
+ 1c3:	00 01                	add    %al,(%ecx)
+
+000001c5 <..@6.sigo>:
+ 1c5:	a1 4e 00 bb 50       	mov    0x50bb004e,%eax
+ 1ca:	00 f7                	add    %dh,%bh
+ 1cc:	e3 89                	jecxz  157 <..@4.ciclo_cadena+0x32>
+ 1ce:	c3                   	ret    
+ 1cf:	ba 00 00 01 d3       	mov    $0xd3010000,%edx
+ 1d4:	d1 e3                	shl    %ebx
+ 1d6:	bf 2e 00 b9 17       	mov    $0x17b9002e,%edi
+ 1db:	00 b4 07 8a 05 26 89 	add    %dh,-0x76d9fa76(%edi,%eax,1)
+
+000001de <..@6.ciclo_cadena>:
+ 1de:	8a 05 26 89 07 83    	mov    0x83078926,%al
+ 1e4:	c3                   	ret    
+ 1e5:	02 47 e2             	add    -0x1e(%edi),%al
+ 1e8:	f5                   	cmc    
+ 1e9:	07                   	pop    %es
+ 1ea:	61                   	popa   
+ 1eb:	31 c0                	xor    %eax,%eax
+ 1ed:	8e e0                	mov    %eax,%fs
+ 1ef:	f7 d0                	not    %eax
+ 1f1:	8e e8                	mov    %eax,%gs
+ 1f3:	bf 00 05 be 10       	mov    $0x10be0500,%edi
+ 1f8:	05 64 8a 05 50       	add    $0x50058a64,%eax
+ 1fd:	65 8a 04 50          	mov    %gs:(%eax,%edx,2),%al
+ 201:	64 c6 05 00 65 c6 04 	movb   $0xff,%fs:0x4c66500
+ 208:	ff 
+ 209:	64 80 3d ff 74 3c 60 	cmpb   $0x6,%fs:0x603c74ff
+ 210:	06 
+ 211:	b8 00 b8 8e c0       	mov    $0xc08eb800,%eax
+ 216:	ba ff ff 83 fa       	mov    $0xfa83ffff,%edx
+ 21b:	ff 74 05 83          	pushl  -0x7d(%ebp,%eax,1)
+ 21f:	06                   	push   %es
+ 220:	4e                   	dec    %esi
+ 221:	00 01                	add    %al,(%ecx)
+
+00000223 <..@7.sigo>:
+ 223:	a1 4e 00 bb 50       	mov    0x50bb004e,%eax
+ 228:	00 f7                	add    %dh,%bh
+ 22a:	e3 89                	jecxz  1b5 <checkear_A20+0xb>
+ 22c:	c3                   	ret    
+ 22d:	ba 17 00 01 d3       	mov    $0xd3010017,%edx
+ 232:	d1 e3                	shl    %ebx
+ 234:	bf 45 00 b9 03       	mov    $0x3b90045,%edi
+ 239:	00 b4 0a 8a 05 26 89 	add    %dh,-0x76d9fa76(%edx,%ecx,1)
+
+0000023c <..@7.ciclo_cadena>:
+ 23c:	8a 05 26 89 07 83    	mov    0x83078926,%al
+ 242:	c3                   	ret    
+ 243:	02 47 e2             	add    -0x1e(%edi),%al
+ 246:	f5                   	cmc    
+ 247:	07                   	pop    %es
+ 248:	61                   	popa   
+ 249:	eb 3a                	jmp    285 <checkear_A20.sigue>
+
+0000024b <checkear_A20.falla>:
+ 24b:	60                   	pusha  
+ 24c:	06                   	push   %es
+ 24d:	b8 00 b8 8e c0       	mov    $0xc08eb800,%eax
+ 252:	ba ff ff 83 fa       	mov    $0xfa83ffff,%edx
+ 257:	ff 74 05 83          	pushl  -0x7d(%ebp,%eax,1)
+ 25b:	06                   	push   %es
+ 25c:	4e                   	dec    %esi
+ 25d:	00 01                	add    %al,(%ecx)
+
+0000025f <..@8.sigo>:
+ 25f:	a1 4e 00 bb 50       	mov    0x50bb004e,%eax
+ 264:	00 f7                	add    %dh,%bh
+ 266:	e3 89                	jecxz  1f1 <..@6.ciclo_cadena+0x13>
+ 268:	c3                   	ret    
+ 269:	ba 17 00 01 d3       	mov    $0xd3010017,%edx
+ 26e:	d1 e3                	shl    %ebx
+ 270:	bf 48 00 b9 06       	mov    $0x6b90048,%edi
+ 275:	00 b4 0c 8a 05 26 89 	add    %dh,-0x76d9fa76(%esp,%ecx,1)
+
+00000278 <..@8.ciclo_cadena>:
+ 278:	8a 05 26 89 07 83    	mov    0x83078926,%al
+ 27e:	c3                   	ret    
+ 27f:	02 47 e2             	add    -0x1e(%edi),%al
+ 282:	f5                   	cmc    
+ 283:	07                   	pop    %es
+ 284:	61                   	popa   
+
+00000285 <checkear_A20.sigue>:
+ 285:	58                   	pop    %eax
+ 286:	65 88 04 58          	mov    %al,%gs:(%eax,%ebx,2)
+ 28a:	64 88 05 b8 00 00 74 	mov    %al,%fs:0x740000b8
+ 291:	03 b8 01 00 5e 5f    	add    0x5f5e0001(%eax),%edi
+
+00000295 <check_a20__exit>:
+ 295:	5e                   	pop    %esi
+ 296:	5f                   	pop    %edi
+ 297:	0f a9                	pop    %gs
+ 299:	0f a1                	pop    %fs
+ 29b:	9d                   	popf   
+ 29c:	c3                   	ret    
+ 29d:	eb 43                	jmp    2e2 <start>
+
+0000029f <iniciando_mr_msg>:
+ 29f:	49                   	dec    %ecx
+ 2a0:	6e                   	outsb  %ds:(%esi),(%dx)
+ 2a1:	69 63 69 61 6e 64 6f 	imul   $0x6f646e61,0x69(%ebx),%esp
+ 2a8:	20 6b 65             	and    %ch,0x65(%ebx)
+ 2ab:	72 6e                	jb     31b <..@12.ciclo_cadena+0x15>
+ 2ad:	65                   	gs
+ 2ae:	6c                   	insb   (%dx),%es:(%edi)
+ 2af:	20 28                	and    %ch,(%eax)
+ 2b1:	4d                   	dec    %ebp
+ 2b2:	6f                   	outsl  %ds:(%esi),(%dx)
+ 2b3:	64 6f                	outsl  %fs:(%esi),(%dx)
+ 2b5:	20 52 65             	and    %dl,0x65(%edx)
+ 2b8:	61                   	popa   
+ 2b9:	6c                   	insb   (%dx),%es:(%edi)
+ 2ba:	29 2e                	sub    %ebp,(%esi)
+ 2bc:	2e                   	cs
+ 2bd:	2e                   	cs
+
+000002be <iniciando_mp_msg>:
+ 2be:	49                   	dec    %ecx
+ 2bf:	6e                   	outsb  %ds:(%esi),(%dx)
+ 2c0:	69 63 69 61 6e 64 6f 	imul   $0x6f646e61,0x69(%ebx),%esp
+ 2c7:	20 6b 65             	and    %ch,0x65(%ebx)
+ 2ca:	72 6e                	jb     33a <mp+0x10>
+ 2cc:	65                   	gs
+ 2cd:	6c                   	insb   (%dx),%es:(%edi)
+ 2ce:	20 28                	and    %ch,(%eax)
+ 2d0:	4d                   	dec    %ebp
+ 2d1:	6f                   	outsl  %ds:(%esi),(%dx)
+ 2d2:	64 6f                	outsl  %fs:(%esi),(%dx)
+ 2d4:	20 50 72             	and    %dl,0x72(%eax)
+ 2d7:	6f                   	outsl  %ds:(%esi),(%dx)
+ 2d8:	74 65                	je     33f <mp+0x15>
+ 2da:	67 69 64 6f 29 2e 2e 	imul   $0x2e2e2e29,0x6f(%si),%esp
+ 2e1:	2e 
+
+000002e2 <start>:
+ 2e2:	fa                   	cli    
+ 2e3:	60                   	pusha  
+ 2e4:	06                   	push   %es
+ 2e5:	6a 07                	push   $0x7
+ 2e7:	6a 1f                	push   $0x1f
+ 2e9:	68 9f 02 6a 00       	push   $0x6a029f
+ 2ee:	6a 00                	push   $0x0
+ 2f0:	58                   	pop    %eax
+ 2f1:	bb 50 00 f7 eb       	mov    $0xebf70050,%ebx
+ 2f6:	5b                   	pop    %ebx
+ 2f7:	01 d8                	add    %ebx,%eax
+ 2f9:	b8 00 b8 8e c0       	mov    $0xc08eb800,%eax
+ 2fe:	d1 e0                	shl    %eax
+ 300:	5f                   	pop    %edi
+ 301:	59                   	pop    %ecx
+ 302:	58                   	pop    %eax
+ 303:	c1 e0 08             	shl    $0x8,%eax
+
+00000306 <..@12.ciclo_cadena>:
+ 306:	8a 05 26 89 07 83    	mov    0x83078926,%al
+ 30c:	c3                   	ret    
+ 30d:	02 47 e2             	add    -0x1e(%edi),%al
+ 310:	f5                   	cmc    
+ 311:	07                   	pop    %es
+ 312:	61                   	popa   
+ 313:	e8 e0 fd 0f 01       	call   11000f8 <..@14.ciclo_cadena+0x10ffd7f>
+ 318:	16                   	push   %ss
+ 319:	00 00                	add    %al,(%eax)
+ 31b:	0f 20 c0             	mov    %cr0,%eax
+ 31e:	66 83 c8 01          	or     $0x1,%ax
+ 322:	0f 22 c0             	mov    %eax,%cr0
+ 325:	ea 2a 03 08 00 31 c0 	ljmp   $0xc031,$0x8032a
+
+0000032a <mp>:
+ 32a:	31 c0                	xor    %eax,%eax
+ 32c:	66 b8 40 00          	mov    $0x40,%ax
+ 330:	8e c8                	mov    %eax,%cs
+ 332:	66 b8 50 00          	mov    $0x50,%ax
+ 336:	8e d8                	mov    %eax,%ds
+ 338:	8e e0                	mov    %eax,%fs
+ 33a:	66 b8 58 00          	mov    $0x58,%ax
+ 33e:	8e d0                	mov    %eax,%ss
+ 340:	66 b8 48 00          	mov    $0x48,%ax
+ 344:	8e c0                	mov    %eax,%es
+ 346:	bd 00 70 02 00       	mov    $0x27000,%ebp
+ 34b:	bc 00 70 02 00       	mov    $0x27000,%esp
+ 350:	60                   	pusha  
+ 351:	6a 07                	push   $0x7
+ 353:	6a 24                	push   $0x24
+ 355:	68 be 02 00 00       	push   $0x2be
+ 35a:	6a 05                	push   $0x5
+ 35c:	6a 04                	push   $0x4
+ 35e:	58                   	pop    %eax
+ 35f:	bb 50 00 00 00       	mov    $0x50,%ebx
+ 364:	f7 eb                	imul   %ebx
+ 366:	5b                   	pop    %ebx
+ 367:	01 d8                	add    %ebx,%eax
+ 369:	bb 00 80 0b 00       	mov    $0xb8000,%ebx
+ 36e:	d1 e0                	shl    %eax
+ 370:	01 c3                	add    %eax,%ebx
+ 372:	5f                   	pop    %edi
+ 373:	59                   	pop    %ecx
+ 374:	58                   	pop    %eax
+ 375:	66 c1 e0 08          	shl    $0x8,%ax
+
+00000379 <..@14.ciclo_cadena>:
+ 379:	8a 07                	mov    (%edi),%al
+ 37b:	66 89 03             	mov    %ax,(%ebx)
+ 37e:	83 c3 02             	add    $0x2,%ebx
+ 381:	47                   	inc    %edi
+ 382:	e2 f5                	loop   379 <..@14.ciclo_cadena>
+ 384:	61                   	popa   
+ 385:	b8 ff ff 00 00       	mov    $0xffff,%eax
+ 38a:	bb ff ff 00 00       	mov    $0xffff,%ebx
+ 38f:	b9 ff ff 00 00       	mov    $0xffff,%ecx
+ 394:	ba ff ff 00 00       	mov    $0xffff,%edx
+ 399:	eb fe                	jmp    399 <..@14.ciclo_cadena+0x20>
+ 39b:	eb fe                	jmp    39b <..@14.ciclo_cadena+0x22>
