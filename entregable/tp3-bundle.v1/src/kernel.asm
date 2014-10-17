@@ -23,6 +23,13 @@ iniciando_mp_len equ    $ - iniciando_mp_msg
 iniciando_vide_msg db   'Iniciando Pantalla...'
 iniciando_vide_len equ  $ - iniciando_vide_msg
 
+iniciando_idt_msg db   'Iniciando IDT...'
+iniciando_idt_len equ  $ - iniciando_idt_msg
+
+cargando_idt_msg db   'Cargando IDT...'
+cargando_idt_len equ  $ - cargando_idt_msg
+
+
 ok_msg db 'ok!'
 ok_len equ $ - ok_msg
 
@@ -57,12 +64,10 @@ start:
     call habilitar_A20
 
     ; Cargar la GDT
-
-    ;imprimir_texto_mr iniciando_GDT_msg, iniciando_GDT_len, 0x07,5,0
  
-    lgdt [GDT_DESC] ; puede que sea fruta
+    lgdt [GDT_DESC]
 
-    ;imprimir_texto_mr ok_msg,ok_len,0x07,10,0
+
 
     ; Setear el bit PE del registro CR0
 
@@ -124,19 +129,9 @@ mp:
 
     imprimir_texto_mp iniciando_vide_msg, iniciando_vide_len, 0x07,3,0
 
-    xor eax, eax
-    xor edi, edi
-    mov di, 0xa000 ;caracter nulo(00), fondo verde (A0)
+    call actualizarPantalla
 
-    ;xchg bx,bx
-
-init:
-    mov [gs:eax], di
-    add eax, 2
-    cmp eax, 8000 ;80 x 50 (tamaño de la pantalla) x 2 (tamaño de un pixel)
-    jnz init
-
-    imprimir_texto_mp ok_msg, ok_len, 0x07,0,0
+    imprimir_texto_mp ok_msg, ok_len, 0x20,25,40
 
     ; Inicializar el manejador de memoria
  
@@ -154,9 +149,28 @@ init:
 
     ; Inicializar la IDT
     
+    imprimir_texto_mp iniciando_idt_msg, iniciando_idt_len, 0x20, 0,1
+
+    call idt_inicializar
+
     ; Cargar IDT
- 
+
+    imprimir_texto_mp cargando_idt_msg, cargando_idt_len, 0x20, 1,1
+
+    lidt [IDT_DESC]
+
+
+    ;prueba de int 0
+    ;xor esi, esi
+    ;idiv esi
+
+    ;prueba de int 13
+    mov ecx, 0xffffffff
+    mov [gs:ecx], di
+
     ; Configurar controlador de interrupciones
+
+    
 
     ; Cargar tarea inicial
 
@@ -175,5 +189,53 @@ init:
 ;; -------------------------------------------------------------------------- ;;
 
 
+;;;;;;;;;;;;;;;;;;;Funciones Del Kernel;;;;;;;;;;;;;;;;;;
+actualizarPantalla:
+
+    push ebp
+    mov ebp, esp
+    pusha
+
+    xor eax, eax ; fila
+    xor esi, esi ; col
+    xor ecx, ecx ; putero
+
+
+    xor edi, edi
+    xor ebx, ebx
+    xor edx, edx
+
+    mov di, 0x2000 ;caracter nulo(00), fondo verde (A0)
+    mov dx, 0x3000 ;caracter nulo(00), fondo rojo (C0)
+    mov bx, 0x4000 ;caracter nulo(00), fondo azul horrible (B0)
+    ;xchg bx,bx
+
+newLine:
+    mov [gs:ecx], bx
+    add ecx, 2
+    inc eax
+init:
+    mov [gs:ecx], di
+
+    add ecx, 2
+    inc eax
+    cmp eax, 79
+    jnz init
+
+    mov [gs:ecx], dx
+    add ecx, 2
+
+    xor eax, eax
+    inc esi
+    cmp esi, 50
+    jnz newLine
+
+    popa
+    pop ebp
+    ret
+
+
 %include "a20.asm"
 extern GDT_DESC
+extern IDT_DESC
+extern idt_inicializar

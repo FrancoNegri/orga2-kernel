@@ -41,7 +41,14 @@ idt_descriptor IDT_DESC = {
     idt[numero].offset_16_31 = (unsigned short) ((unsigned int)(&_isr ## numero) >> 16 & (unsigned int) 0xFFFF);
 */
 
+    #define IDT_ENTRY(numero)                                                                                        \
+        idt[numero].offset_0_15 = (unsigned short) ((unsigned int)(&_isr ## numero) & (unsigned int) 0xFFFF);        \
+        idt[numero].segsel = (unsigned short) 0x40;       /*codigo del kernel*/                                      \
+        idt[numero].attr = (unsigned short) 0x8E00;      /* 1 00 01110 000 00000    */                               \
+        idt[numero].offset_16_31 = (unsigned short) ((unsigned int)(&_isr ## numero) >> 16 & (unsigned int) 0xFFFF); 
 
 void idt_inicializar() {
+    IDT_ENTRY(0);
+    IDT_ENTRY(13);
     // Excepciones
 }

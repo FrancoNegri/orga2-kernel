@@ -11,6 +11,12 @@ BITS 32
 sched_tarea_offset:     dd 0x00
 sched_tarea_selector:   dw 0x00
 
+int0_capturada: db "La int 0 fue capturada con exito!"
+int0_capturada_len equ $ - int0_capturada
+
+int13_capturada: db "General Protection"
+int13_capturada_len equ $ - int13_capturada
+
 ;; PIC
 extern fin_intr_pic1
 
@@ -20,15 +26,6 @@ extern sched_proximo_indice
 ;;
 ;; Definición de MACROS
 ;; -------------------------------------------------------------------------- ;;
-
-%macro ISR 1
-global _isr%1
-
-_isr%1:
-    mov eax, %1
-    jmp $
-
-%endmacro
 
 ;;
 ;; Datos
@@ -40,7 +37,17 @@ isrClock:            db '|/-\'
 ;;
 ;; Rutina de atención de las EXCEPCIONES
 ;; -------------------------------------------------------------------------- ;;
-ISR 0
+
+global _isr0
+global _isr13
+
+_isr0:
+    imprimir_texto_mp int0_capturada,int0_capturada_len,0x20, 4,1
+    jmp $
+
+_isr13:
+    imprimir_texto_mp int13_capturada,int13_capturada_len,0x20, 5,1
+    jmp $
 
 ;;
 ;; Rutina de atención del RELOJ
