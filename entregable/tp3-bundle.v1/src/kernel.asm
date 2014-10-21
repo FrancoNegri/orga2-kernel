@@ -29,6 +29,11 @@ iniciando_idt_len equ  $ - iniciando_idt_msg
 cargando_idt_msg db   'Cargando IDT...'
 cargando_idt_len equ  $ - cargando_idt_msg
 
+iniciando_paginacion db "Inicando Paginacion"
+iniciando_paginacion_len equ $ - iniciando_paginacion
+
+mensaje_bienvenida db "El Senior de los novillos"
+mensaje_bienvenida_len equ $ - mensaje_bienvenida
 
 ok_msg db 'ok!'
 ok_len equ $ - ok_msg
@@ -48,6 +53,7 @@ start:
     
     ; Deshabilitar interrupciones
     cli    
+    xchg bx,bx     ;;;;;;;;;;;;;;;;;; DEBUG LINE;;;;;;;;;;;;;;;;;
 
     ; Cambiar modo de video a 80 X 50
     mov ax, 0003h
@@ -71,7 +77,6 @@ start:
 
     ; Setear el bit PE del registro CR0
 
-    ;xchg bx,bx     ;;;;;;;;;;;;;;;;;; DEBUG LINE;;;;;;;;;;;;;;;;;
 
     mov eax, CR0
     or eax, 1
@@ -134,14 +139,27 @@ mp:
     imprimir_texto_mp ok_msg, ok_len, 0x20,25,40
 
     ; Inicializar el manejador de memoria
- 
+   
     ; Inicializar el directorio de paginas
-    
-    ; Cargar directorio de paginas
 
-    ; Habilitar paginacion
+    imprimir_texto_mp iniciando_paginacion, iniciando_paginacion_len, 0x20,7,1
+
+        call page_init
+
+    ; Cargar directorio de paginas
+        mov eax, 0x27000         
+        mov cr3, eax
     
+    ; Habilitar paginacion
+        mov eax, cr0                
+        or  eax, 0x80000000     
+        mov cr0, eax
+    
+    imprimir_texto_mp mensaje_bienvenida,mensaje_bienvenida_len, 0x20, 8, 80 - mensaje_bienvenida_len
+
     ; Inicializar tss
+
+
 
     ; Inicializar tss de la tarea Idle
 
@@ -164,6 +182,8 @@ mp:
     ;xor esi, esi
     ;idiv esi
 
+    call actualizarPantalla
+
     ;prueba de int 13
     mov ecx, 0xffffffff
     mov [gs:ecx], di
@@ -179,6 +199,9 @@ mp:
     ; Saltar a la primera tarea: Idle
 
     ; Ciclar infinitamente (por si algo sale mal...)
+
+    
+
     mov eax, 0xFFFF
     mov ebx, 0xFFFF
     mov ecx, 0xFFFF
@@ -234,7 +257,7 @@ init:
     pop ebp
     ret
 
-
+%include "paging.asm"
 %include "a20.asm"
 extern GDT_DESC
 extern IDT_DESC
