@@ -38,3 +38,15 @@ page_init:
 	popad
 	ret
 
+;void mapearPagina(void *direccionReal, void* direccionVirtual, void* directorioDePaginas)
+mapearPagina:
+    push ebp
+    mov ebp, esp
+    mov eax, [esp+8];direccionReal
+    mov edx, [esp+12];direccionVirtual
+    mov edi, [esp+16];directorioDePaginas
+
+    ;hacemos shift para sacar el offset
+    ;hacemos una mascara para separar el offset del page directory y el page completar page table
+    ;seteamos bien el page dir y el page table
+    ;fin...

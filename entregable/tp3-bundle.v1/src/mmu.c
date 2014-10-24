@@ -7,8 +7,12 @@
 
 #include "mmu.h"
 
-void mmu_inicializar() {
-}
+int contadorDePaginas;
+
+void mmu_inicializar() 
+	{
+	contadorDePaginas = 0;
+	}
 
 
 
