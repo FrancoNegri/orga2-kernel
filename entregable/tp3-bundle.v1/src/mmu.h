@@ -14,7 +14,7 @@
 #include "game.h"
 
 void mmu_inicializar();
-
+void *mmu_inicializar_zombie();
 
 #endif	/* !__MMU_H__ */
 

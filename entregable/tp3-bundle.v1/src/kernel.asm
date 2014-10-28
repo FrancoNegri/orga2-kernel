@@ -10,21 +10,15 @@ global start
 
 ;; Saltear seccion de datos
 jmp start
-
-
 ;; Seccion de código.
 ;; -------------------------------------------------------------------------- ;;
-
-
-
-
 ;; Punto de entrada del kernel.
 BITS 16
 start:
     
     ; Deshabilitar interrupciones
     cli    
-    xchg bx,bx     ;;;;;;;;;;;;;;;;;; DEBUG LINE;;;;;;;;;;;;;;;;;
+    ;xchg bx,bx     ;;;;;;;;;;;;;;;;;; DEBUG LINE;;;;;;;;;;;;;;;;;
 
     ; Cambiar modo de video a 80 X 50
     mov ax, 0003h
@@ -126,6 +120,11 @@ mp:
         or  eax, 0x80000000     
         mov cr0, eax
     
+        xchg bx,bx
+
+        call mmu_inicializar_zombie
+
+
     imprimir_texto_mp mensaje_bienvenida,mensaje_bienvenida_len, 0x20, 8, 80 - mensaje_bienvenida_len
 
     ; Inicializar tss
@@ -170,8 +169,6 @@ mp:
     ; Saltar a la primera tarea: Idle
 
     ; Ciclar infinitamente (por si algo sale mal...)
-
-    
 
     mov eax, 0xFFFF
     mov ebx, 0xFFFF
@@ -233,6 +230,7 @@ init:
 extern GDT_DESC
 extern IDT_DESC
 extern idt_inicializar
+extern mmu_inicializar_zombie
 
 ;;
 ;; Seccion de datos.
