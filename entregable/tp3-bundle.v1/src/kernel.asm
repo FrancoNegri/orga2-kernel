@@ -11,36 +11,7 @@ global start
 ;; Saltear seccion de datos
 jmp start
 
-;;
-;; Seccion de datos.
-;; -------------------------------------------------------------------------- ;;
-iniciando_mr_msg db     'Iniciando kernel (Modo Real)...'
-iniciando_mr_len equ    $ - iniciando_mr_msg
 
-iniciando_mp_msg db     'Iniciando kernel (Modo Protegido)...'
-iniciando_mp_len equ    $ - iniciando_mp_msg
-
-iniciando_vide_msg db   'Iniciando Pantalla...'
-iniciando_vide_len equ  $ - iniciando_vide_msg
-
-iniciando_idt_msg db   'Iniciando IDT...'
-iniciando_idt_len equ  $ - iniciando_idt_msg
-
-cargando_idt_msg db   'Cargando IDT...'
-cargando_idt_len equ  $ - cargando_idt_msg
-
-iniciando_paginacion db "Inicando Paginacion"
-iniciando_paginacion_len equ $ - iniciando_paginacion
-
-mensaje_bienvenida db "El Senior de los novillos"
-mensaje_bienvenida_len equ $ - mensaje_bienvenida
-
-ok_msg db 'ok!'
-ok_len equ $ - ok_msg
-
-
-
-;;
 ;; Seccion de código.
 ;; -------------------------------------------------------------------------- ;;
 
@@ -262,3 +233,31 @@ init:
 extern GDT_DESC
 extern IDT_DESC
 extern idt_inicializar
+
+;;
+;; Seccion de datos.
+;; -------------------------------------------------------------------------- ;;
+iniciando_mr_msg db     'Iniciando kernel (Modo Real)...'
+iniciando_mr_len equ    $ - iniciando_mr_msg
+
+iniciando_mp_msg db     'Iniciando kernel (Modo Protegido)...'
+iniciando_mp_len equ    $ - iniciando_mp_msg
+
+iniciando_vide_msg db   'Iniciando Pantalla...'
+iniciando_vide_len equ  $ - iniciando_vide_msg
+
+iniciando_idt_msg db   'Iniciando IDT...'
+iniciando_idt_len equ  $ - iniciando_idt_msg
+
+cargando_idt_msg db   'Cargando IDT...'
+cargando_idt_len equ  $ - cargando_idt_msg
+
+iniciando_paginacion db "Inicando Paginacion"
+iniciando_paginacion_len equ $ - iniciando_paginacion
+
+mensaje_bienvenida db "El Senior de los novillos"
+mensaje_bienvenida_len equ $ - mensaje_bienvenida
+
+ok_msg db 'ok!'
+ok_len equ $ - ok_msg
+;;
