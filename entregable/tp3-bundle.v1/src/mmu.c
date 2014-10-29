@@ -7,43 +7,39 @@
 #include "mmu.h"
 #include "paging.h"
 
-int contadorDePaginas;
-int contadorDeDirectorios;
-
+void* dirGlobal;
 void mmu_inicializar() 
-	{
-		contadorDePaginas = 0;
-		contadorDeDirectorios = 0;
+{
+		dirGlobal = (void*) 0x100000;
 		return;
-	}
+}
 
-void *mmu_inicializar_zombie()
+void *pedirPagina()
+{
+	dirGlobal = dirGlobal +0x01000;
+	pedirPagina_0(dirGlobal);
+	return dirGlobal;
+}
+
+
+void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 {
 	int i;
-	int aux = 0x12000 + contadorDeDirectorios * 0x1000;
-	void *direccionDelDirectorio = (void*) aux;
+	void *direccionDelDirectorio = pedirPagina();
+	void *direccionDePagina= pedirPagina();
 
-	aux = 0x13000 + 0x1000 * contadorDePaginas;
-	void *direccionDePagina = (void*) aux;
-
-	contadorDeDirectorios++;
-
-	crearPageDirectory(direccionDelDirectorio);
+	mapearPagina((void*)0x0, (void*)0x0, direccionDelDirectorio, (void*)0x28000);
 
 	for(i = 0; i < 9; i++)
 	{
-		aux = aux + 0x1000;
-		direccionDePagina = (void*) aux;
-		crearPageTable(direccionDePagina);
-
-		//direccion real??
-		void *direccionReal = (void*) 0x1; //no se!
-		void *direccionVirtual = (void*) 0x0;
-		mapearPagina(direccionReal, direccionVirtual, direccionDelDirectorio, direccionDePagina);
+		void *direccionVirtual = (void*) 0x400000 + 0x1000*i;
+		mapearPagina(direccionReal, direccionVirtual, direccionDelDirectorio, direccionDePagina); //ponr bien las drecciones reales
 	}
 	return direccionDelDirectorio;
+
 }
 
 
 
 
+/*para mapear las paginas del zombie, vamos a tener que tomar el ancho de fila (78 x 2^10 (1 kb) * 4 )*/

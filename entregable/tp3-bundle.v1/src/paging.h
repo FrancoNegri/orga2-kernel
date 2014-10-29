@@ -4,6 +4,4 @@ void unmapearPagina(void* direccionVirtual, void* directorioDePaginas,void* pagi
 
 void mapearPagina(void *direccionReal, void* direccionVirtual, void* directorioDePaginas,void* pagina);
 
-void crearPageDirectory(void * direccion);
-
-void crearPageTable(void * direccion);
+void pedirPagina_0(void* direccion);

@@ -3,9 +3,11 @@ page_init:
 ;inicializar la primera entrada del directorio con la direccion de la tabla
 	pushad
 
-    mov edi, 0x27000
+    push 0x27000
 
-	call crearPageDirectory
+	call pedirPagina_0
+
+    add esp, 4
 
     mov dword [0x27000], 0x28003 ;supervisor, read/write, present
 
@@ -24,20 +26,23 @@ page_init:
         jmp .completar_page_table
 	.fin_completar_page_table:
 
+
 	popad
 	ret
 
+global pedirPagina_0
 
-global crearPageDirectory
-
-;void crearPageDirectory(void * direccion)
-crearPageDirectory:
-    pushad
+;void *pedirPagina_0(void *direccion)
+pedirPagina_0:
+    push ebp
     mov ebp, esp
+    push ebx
+    push ecx
 
     xor ecx, ecx
-    mov ebx, edi
-    
+    mov ebx, [ebp+8]
+
+
     .completar_page_directory:
         cmp ecx, 1024
         je .fin_completar_page_directory
@@ -47,29 +52,20 @@ crearPageDirectory:
         jmp .completar_page_directory
 
     .fin_completar_page_directory:
-    
-    popad
+
+    pop ecx
+    pop ebx
+    pop ebp
+
     ret
 
-
-
-global crearPageTable
-
-
-;void crearPageTable(void * direccion)
-;por ahora son iguales, pero no estoy seguro
-crearPageTable:
-    call crearPageDirectory
-    ret
 
 global mapearPagina
-
-
 mascara: dd 0xFFFFF000
 ;void mapearPagina(void *direccionReal, void* direccionVirtual, void* directorioDePaginas,void* pagina)
 mapearPagina:
     
-    xchg bx,bx
+    ;xchg bx,bx
     pushad
     mov ebp, esp
     mov eax, [ebp+8];direccionReal
@@ -90,11 +86,12 @@ mapearPagina:
 
     and ebx, mascara
     mov [edi + esi], ebx; aca apunto a la pagina que corresponde
-    add dword [ebx + eax], 0x00000003; le digo que esta precente
+    add dword [ebx + eax], 0x00000003; le digo que esta presente
 
     and edx, mascara
     mov [ebx + eax], edx; aca mapeo de la pagina a la dirreccion que quiero
-    add dword [ebx + eax], 0x00000003; le digo que esta precente
+    add dword [ebx + eax], 0x00000003; le digo que esta preente
+
 
     popad
     ret
@@ -127,9 +124,6 @@ unmapearPagina:
     ;tengo que sacarle la ultima parte donde van los flags
 
     and ebx, mascara
-    mov [edi + esi], ebx; aca apunto a la pagina que corresponde
-    add dword [ebx + eax], 0x00000003; le digo que esta precente
-
     and edx, mascara
     mov dword [ebx + eax], 0; desmapeo la pagina
 

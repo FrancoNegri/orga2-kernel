@@ -122,7 +122,7 @@ mp:
     
         xchg bx,bx
 
-        call mmu_inicializar_zombie
+       ; call mmu_inicializar_zombie
 
 
     imprimir_texto_mp mensaje_bienvenida,mensaje_bienvenida_len, 0x20, 8, 80 - mensaje_bienvenida_len
@@ -155,16 +155,23 @@ mp:
     call actualizarPantalla
 
     ;prueba de int 13
-    mov ecx, 0xffffffff
-    mov [gs:ecx], di
+    ;mov ecx, 0xffffffff
+    ;mov [gs:ecx], di
 
     ; Configurar controlador de interrupciones
 
-    
+    call resetear_pic
+    call habilitar_pic
+
+    int 0x66
 
     ; Cargar tarea inicial
 
+
+
     ; Habilitar interrupciones
+
+    sti
 
     ; Saltar a la primera tarea: Idle
 
@@ -231,6 +238,8 @@ extern GDT_DESC
 extern IDT_DESC
 extern idt_inicializar
 extern mmu_inicializar_zombie
+extern habilitar_pic
+extern resetear_pic
 
 ;;
 ;; Seccion de datos.

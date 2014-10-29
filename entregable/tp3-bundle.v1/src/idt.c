@@ -50,5 +50,9 @@ idt_descriptor IDT_DESC = {
 void idt_inicializar() {
     IDT_ENTRY(0);
     IDT_ENTRY(13);
+    IDT_ENTRY(32);
+    IDT_ENTRY(33);
+    IDT_ENTRY(66);
+
     // Excepciones
 }

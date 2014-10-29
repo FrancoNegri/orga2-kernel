@@ -52,14 +52,35 @@ _isr13:
 ;;
 ;; Rutina de atención del RELOJ
 ;; -------------------------------------------------------------------------- ;;
+global _isr32
+_isr32:
+    call proximo_reloj
+    call fin_intr_pic1
+
+    iret
 
 ;;
 ;; Rutina de atención del TECLADO
 ;; -------------------------------------------------------------------------- ;;
 
+global _isr33
+_isr33:
+    call fin_intr_pic1
+    iret
+
+
+
 ;;
 ;; Rutinas de atención de las SYSCALLS
 ;; -------------------------------------------------------------------------- ;;
+global _isr66
+_isr66:
+    mov eax, 0x42
+    call fin_intr_pic1
+    iret
+
+
+
 
 %define IZQ 0xAAA
 %define DER 0x441
