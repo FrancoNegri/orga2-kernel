@@ -62,12 +62,120 @@ _isr32:
 ;;
 ;; Rutina de atención del TECLADO
 ;; -------------------------------------------------------------------------- ;;
+%define IZQ 0xAAA
+%define DER 0x441
+%define ADE 0x83D
+%define ATR 0x732
+
+
+%define Tab 0x0f
+%define Q 0x10
+%define W 0x11
+%define E 0x12
+%define R 0x13
+%define T 0x14
+%define Y 0x15
+%define U 0x16
+%define I 0x17
+%define O 0x18
+%define P 0x19
+%define BrktL{ 0x1a
+%define BrktR} 0x1b
+%define nter 0x1c
+%define LCtrl 0x1d
+%define A 0x1e
+%define S 0x1f
+%define D 0x20
+%define F 0x21
+%define G 0x22
+%define H 0x23
+%define J 0x24
+%define K 0x25
+%define L 0x26
+%define ptoYcoma 0x27
+%define comas 0x28
+;%define `~ 0x29
+%define LShift 0x2a
+;%define \| 0x2b
+%define Z 0x2c
+%define X 0x2d
+%define C 0x2e
+%define V 0x2f
+%define B 0x30
+%define N 0x31
+%define M 0x32
+%define coma< 0x33
+%define punto> 0x34
+%define Barra/Pregunta 0x35
+%define RShift 0x36
+;%define Keypad-* 0x37
+%define LAlt 0x38
+%define Space bar 0x39
+%define CapsLock 0x3a
+%define F1 0x3b
+%define F2 0x3c
+%define F3 0x3d
+%define F4 0x3e
+%define F5 0x3f
+%define F6 0x40
+%define F7 0x41
+%define F8 0x42
+%define F9 0x43
+%define F10 0x44
+%define NumLock 0x45 
+%define ScrollLock 0x46 
+%define Keypad/Home 0x47 
+%define Keypad/Up 0x48 
+%define Keypad/PgUp 0x49 
+;%define Keypad 0x4a 
+%define Keypad/Left 0x4b 
+;%define Keypad 0x4c 
+%define Keypad/Right 0x4d
+;%define Keypad 0x4e
+%define Keypad/End 0x4f
+%define Keypad/Down 0x50
+%define Keypad/PgDn 0x51
+;%define Keypad 0x52
+%define Keypad/Del 0x53
+
+coordenadaX dd 40
+coordenadaY dd 25
+
 
 global _isr33
 _isr33:
+    pushad
+    in al, 0x60
+    cmp al, A
+    jz .moverDer
+    cmp al, DER
+    jz .fin
+    cmp al, ADE
+    jz .fin
+    cmp al, ATR
+    jz .fin
+    jmp .fin
+.moverDer:
+    call moverDerecha
+    jmp .fin
+.fin:
     call fin_intr_pic1
+    popad
     iret
 
+moverDerecha:
+    pushad
+    mov eax, 79
+    imul dword [coordenadaY]
+    mov ecx, [coordenadaX]
+    inc ecx
+    mov [coordenadaX], ecx
+    dec ecx
+    add ecx, eax
+    mov di, 0x3000
+    mov [gs:ecx], di
+    popad
+    ret
 
 
 ;;
@@ -77,15 +185,11 @@ global _isr66
 _isr66:
     mov eax, 0x42
     call fin_intr_pic1
+
     iret
 
 
 
-
-%define IZQ 0xAAA
-%define DER 0x441
-%define ADE 0x83D
-%define ATR 0x732
 
 
 ;; Funciones Auxiliares

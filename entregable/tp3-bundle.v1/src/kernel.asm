@@ -163,7 +163,7 @@ mp:
     call resetear_pic
     call habilitar_pic
 
-    int 0x66
+    ;int 0x66
 
     ; Cargar tarea inicial
 
@@ -174,6 +174,8 @@ mp:
     sti
 
     ; Saltar a la primera tarea: Idle
+
+    call actualizarPantalla
 
     ; Ciclar infinitamente (por si algo sale mal...)
 
