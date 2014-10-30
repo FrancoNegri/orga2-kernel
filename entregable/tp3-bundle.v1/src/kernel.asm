@@ -93,21 +93,31 @@ mp:
 
     ; Imprimir mensaje de bienvenida
 
-    imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
+    push iniciando_mp_msg
+    call print
+    add esp, 4
+
+    xchg bx,bx
 
     ; Inicializar pantalla
 
-    imprimir_texto_mp iniciando_vide_msg, iniciando_vide_len, 0x07,3,0
+    push iniciando_vide_msg
+    call print
+    add esp, 4
 
     call actualizarPantalla
 
-    imprimir_texto_mp ok_msg, ok_len, 0x20,25,40
+    push ok_msg
+    call print
+    add esp, 4
 
     ; Inicializar el manejador de memoria
    
     ; Inicializar el directorio de paginas
 
-    imprimir_texto_mp iniciando_paginacion, iniciando_paginacion_len, 0x20,7,1
+        push iniciando_paginacion
+        call print
+        add esp, 4
 
         call page_init
 
@@ -120,12 +130,13 @@ mp:
         or  eax, 0x80000000     
         mov cr0, eax
     
-        xchg bx,bx
+       
 
        ; call mmu_inicializar_zombie
 
-
-    imprimir_texto_mp mensaje_bienvenida,mensaje_bienvenida_len, 0x20, 8, 80 - mensaje_bienvenida_len
+    push mensaje_bienvenida
+    call print
+    add esp, 4
 
     ; Inicializar tss
 
@@ -137,13 +148,17 @@ mp:
 
     ; Inicializar la IDT
     
-    imprimir_texto_mp iniciando_idt_msg, iniciando_idt_len, 0x20, 0,1
+    push iniciando_idt_msg
+    call print
+    add esp, 4
 
     call idt_inicializar
 
     ; Cargar IDT
 
-    imprimir_texto_mp cargando_idt_msg, cargando_idt_len, 0x20, 1,1
+    push cargando_idt_msg
+    call print
+    add esp, 4
 
     lidt [IDT_DESC]
 
@@ -151,8 +166,6 @@ mp:
     ;prueba de int 0
     ;xor esi, esi
     ;idiv esi
-
-    call actualizarPantalla
 
     ;prueba de int 13
     ;mov ecx, 0xffffffff
@@ -174,8 +187,6 @@ mp:
     sti
 
     ; Saltar a la primera tarea: Idle
-
-    call actualizarPantalla
 
     ; Ciclar infinitamente (por si algo sale mal...)
 
@@ -234,6 +245,32 @@ init:
     pop ebp
     ret
 
+lineaApuntada dd 1
+;print(string* str)
+print:
+    push ebp
+    mov ebp, esp
+    pushad
+    mov edi,[ebp+8]
+    ;cuento caracteres
+        sub ecx, ecx
+        sub al, al
+        not ecx
+        cld
+        repne   scasb
+        not ecx
+        dec ecx
+
+    imprimir_texto_mp edi, ecx, 0x20, dword [lineaApuntada],1
+    inc dword [lineaApuntada]
+
+    popad
+    pop ebp
+    ret
+
+
+
+
 %include "paging.asm"
 %include "a20.asm"
 extern GDT_DESC
@@ -249,22 +286,22 @@ extern resetear_pic
 iniciando_mr_msg db     'Iniciando kernel (Modo Real)...'
 iniciando_mr_len equ    $ - iniciando_mr_msg
 
-iniciando_mp_msg db     'Iniciando kernel (Modo Protegido)...'
+iniciando_mp_msg db     'Iniciando kernel (Modo Protegido)...',0
 iniciando_mp_len equ    $ - iniciando_mp_msg
 
-iniciando_vide_msg db   'Iniciando Pantalla...'
+iniciando_vide_msg db   'Iniciando Pantalla...',0
 iniciando_vide_len equ  $ - iniciando_vide_msg
 
-iniciando_idt_msg db   'Iniciando IDT...'
+iniciando_idt_msg db   'Iniciando IDT...',0
 iniciando_idt_len equ  $ - iniciando_idt_msg
 
-cargando_idt_msg db   'Cargando IDT...'
+cargando_idt_msg db   'Cargando IDT...',0
 cargando_idt_len equ  $ - cargando_idt_msg
 
-iniciando_paginacion db "Inicando Paginacion"
+iniciando_paginacion db "Inicando Paginacion",0
 iniciando_paginacion_len equ $ - iniciando_paginacion
 
-mensaje_bienvenida db "El Senior de los novillos"
+mensaje_bienvenida db "El Senior de los novillos",0
 mensaje_bienvenida_len equ $ - mensaje_bienvenida
 
 ok_msg db 'ok!'

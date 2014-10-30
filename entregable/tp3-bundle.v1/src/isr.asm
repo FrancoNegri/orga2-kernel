@@ -54,9 +54,10 @@ _isr13:
 ;; -------------------------------------------------------------------------- ;;
 global _isr32
 _isr32:
+    pushad
     call proximo_reloj
     call fin_intr_pic1
-
+    popad
     iret
 
 ;;
@@ -221,9 +222,10 @@ moverDerecha:
 ;; -------------------------------------------------------------------------- ;;
 global _isr66
 _isr66:
-    mov eax, 0x42
+    pushad
     call fin_intr_pic1
-
+    popad
+    mov eax, 0x42
     iret
 
 
