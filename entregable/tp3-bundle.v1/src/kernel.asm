@@ -194,7 +194,7 @@ actualizarPantalla:
 
     push ebp
     mov ebp, esp
-    pusha
+    pushad
 
     xor eax, eax ; fila
     xor esi, esi ; col
@@ -230,7 +230,7 @@ init:
     cmp esi, 50
     jnz newLine
 
-    popa
+    popad
     pop ebp
     ret
 

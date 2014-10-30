@@ -147,15 +147,53 @@ _isr33:
     pushad
     in al, 0x60
     cmp al, A
-    jz .moverDer
-    cmp al, DER
+    jz .A
+    cmp al, B
     jz .fin
-    cmp al, ADE
+    cmp al, C
     jz .fin
-    cmp al, ATR
+    cmp al, D
+    jz .fin
+    cmp al, E
+    jz .fin
+    cmp al, F
+    jz .fin
+    cmp al, G
+    jz .fin
+    cmp al, H
+    jz .fin
+    cmp al, I
+    jz .fin
+    cmp al, J
+    jz .fin
+    cmp al, K
+    jz .fin
+    cmp al, L
+    jz .fin
+    cmp al, M
+    jz .fin
+    cmp al, N
+    jz .fin
+    cmp al, O
+    jz .fin
+    cmp al, P
+    jz .fin
+    cmp al, Q
+    jz .fin
+    cmp al, R
+    jz .fin
+    cmp al, S
+    jz .fin
+    cmp al, T
+    jz .fin
+    cmp al, Y
+    jz .fin
+    cmp al, Z
+    jz .fin
+    cmp al, V
     jz .fin
     jmp .fin
-.moverDer:
+.A:
     call moverDerecha
     jmp .fin
 .fin:
@@ -168,9 +206,9 @@ moverDerecha:
     mov eax, 79
     imul dword [coordenadaY]
     mov ecx, [coordenadaX]
-    inc ecx
+    add ecx,2
     mov [coordenadaX], ecx
-    dec ecx
+    sub ecx, 2
     add ecx, eax
     mov di, 0x3000
     mov [gs:ecx], di
