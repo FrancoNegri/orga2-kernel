@@ -15,11 +15,11 @@ tss tss_zombisB[CANT_ZOMBIS];
 
 void tss_inicializar() {
 		tss_idle.esp0 = 0x27000 ;
-		tss_idle.ss0;// que va???
+		//tss_idle.ss0;// que va???
 		tss_idle.esp1 = 0x27000;
-		tss_idle.ss1; // que va???
+		//tss_idle.ss1; // que va???
 		tss_idle.esp2 = 0x27000;
-		tss_idle.ss2;// que va???
+		//tss_idle.ss2;// que va???
 		tss_idle.cr3 = 0x27000;
 		tss_idle.eip = 0x16000;
 		tss_idle.eflags = 0x0002;
@@ -34,11 +34,11 @@ void tss_inicializar() {
 		//borramos... ldt
 
 		tss_inicial.esp0 = 0x27000 ;
-		tss_inicial.ss0;// que va???
+		//tss_inicial.ss0;// que va???
 		tss_inicial.esp1 = 0x27000;
-		tss_inicial.ss1; // que va???
+		//tss_inicial.ss1; // que va???
 		tss_inicial.esp2 = 0x27000;
-		tss_inicial.ss2;// que va???
+		//tss_inicial.ss2;// que va???
 		tss_inicial.cr3 = 0x27000;
 		tss_inicial.eip = 0x16000;
 		tss_inicial.eflags = 0x0002;

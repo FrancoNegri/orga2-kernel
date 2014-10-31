@@ -10,6 +10,13 @@
 
 #include "defines.h"
 
+#define GDT_IDX_CDE_LVL_0           8
+#define GDT_IDX_CDE_LVL_3           9
+#define GDT_IDX_DATA_LVL_0           10
+#define GDT_IDX_DATA_LVL_3           11
+#define GDT_IDX_VIDEO_LVL_0        12
+#define GDT_IDX_TSS_0           13
+#define GDT_IDX_TSS_1           14
 
 typedef struct str_gdt_descriptor {
     unsigned short  gdt_length;

@@ -8,6 +8,8 @@
 #include "paging.h"
 
 void* dirGlobal;
+void copiarPagina(void **src, void **dst);
+
 void mmu_inicializar() 
 {
 		dirGlobal = (void*) 0x100000;
@@ -37,9 +39,23 @@ void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 	}
 	return direccionDelDirectorio;
 
+	//copio la tarea en el mapa
+	void *paginaAUX= pedirPagina();
+	mapearPagina(direccionReal, (void*) 0xDC4000 , (void*)0x27000, paginaAUX);
+	copiarPagina( (void**)codigo, (void**)0xDC4000);
+
+	
+	
+	unmapearPagina( (void*)0xDC4000, (void*)0x27000,paginaAUX);
 }
 
-
+void copiarPagina(void **src, void **dst)
+{
+	int i;
+	for(i = 0; i < 1024; i++)
+		dst[i] = src[i];
+	return;
+}
 
 
 /*para mapear las paginas del zombie, vamos a tener que tomar el ancho de fila (78 x 2^10 (1 kb) * 4 )*/

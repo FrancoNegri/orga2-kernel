@@ -5,12 +5,7 @@
   definicion de la tabla de descriptores globales
 */
 
-#define GDT_IDX_CDE_LVL_0           8
-#define GDT_IDX_CDE_LVL_3           9
-#define GDT_IDX_DATA_LVL_0           10
-#define GDT_IDX_DATA_LVL_3           11
-#define  GDT_IDX_VIDEO_LVL_0        12
-#define GDT_IDX_TSS_0 13
+
 
 #include "gdt.h"
 
@@ -221,7 +216,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned char)     0x01,           /* db           */
         (unsigned char)     0x00,           /* g            */
         (unsigned char)     0x00,           /* base[31:24]  */
-    }
+    },
     /*cuidado con el solapamiento de segmentos, muy peligroso!*/
 
     [GDT_IDX_TSS_0] = (gdt_entry) {
@@ -238,7 +233,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned char)     0x01,           /* db           */
         (unsigned char)     0x00,           /* g            */
         (unsigned char)     0x00,           /* base[31:24]  */
-    }
+    },
 
      [GDT_IDX_TSS_1] = (gdt_entry) {
         (unsigned short)    0x0068,         /* limit[0:15]  tengo una pantalla de 80x50, para cada pixel necesito 2 bytes (RDI,caracter) = necesito 8000 bytes = 0x2000*/ 

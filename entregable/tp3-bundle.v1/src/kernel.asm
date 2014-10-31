@@ -58,58 +58,43 @@ start:
     ; Establecer selectores de segmentos
 BITS 32
 mp: 
-    xor eax, eax
+        xor eax, eax
+        ;mov ax, 0x40
+        ;mov cs, ax  ; {Index: 8, gdt/ldt: 0, rpl = 0} kernel code, se setea con jmp no es necesario
 
-    ;mov ax, 0x40
-    ;mov cs, ax  ; {Index: 8, gdt/ldt: 0, rpl = 0} kernel code, se setea con jmp no es necesario
+        mov ax, 0x50
+        mov es, ax  ; {Index: 9, gdt/ldt: 0, rpl = 3} App code
 
-    mov ax, 0x48
-    mov es, ax  ; {Index: 9, gdt/ldt: 0, rpl = 3} App code
+        mov ax, 0x50; este es el posta
+        mov ds, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} kernel data
+        mov ss, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} kernel stack
+        
+        mov ax, 0x50 
+        mov fs, ax ;{Index: 11, gdt/ldt: 0, rpl = 3} App data
+        
+        mov ax, 0x50
+        mov gs, ax ;{Index: 12, gdt/ldt: 0, rpl = 0} video data
 
-    mov ax, 0x50
-    mov ds, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} kernel data
-    mov ss, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} kernel stack
-    
-    mov ax, 1011011b 
-    mov fs, ax ;{Index: 11, gdt/ldt: 0, rpl = 3} App data
-    
-    mov ax, 1100000b 
-    mov gs, ax ;{Index: 12, gdt/ldt: 0, rpl = 0} video data
-
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;Selector Map;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;           Sleector                                    LVL     ;
-    ;           cs      ->      Kernel code         ->      0       ;
-    ;           es      ->      App code            ->      3       ;
-    ;           ds      ->      Kernel Data         ->      0       ;
-    ;           ss      ->      Kernel Stak         ->      0       ;
-    ;           fs      ->      App data            ->      3       ;
-    ;           gs      ->      Video Data          ->      0       ;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ; Establecer la base de la pila
     
-    mov ebp, 0x27000
-    mov esp, 0x27000
+        mov ebp, 0x27000
+        mov esp, 0x27000
 
     ; Imprimir mensaje de bienvenida
 
-    push iniciando_mp_msg
-    call print
-    add esp, 4
+        push iniciando_mp_msg
+        call print
+        add esp, 4
 
 
     ; Inicializar pantalla
 
-    push iniciando_vide_msg
-    call print
-    add esp, 4
+        call actualizarPantalla
 
-    call actualizarPantalla
-
-    push ok_msg
-    call print
-    add esp, 4
+        push iniciando_vide_msg
+        call print
+        add esp, 4
 
     ; Inicializar el manejador de memoria
    
@@ -130,13 +115,19 @@ mp:
         or  eax, 0x80000000     
         mov cr0, eax
     
-       
+        push mensaje_bienvenida
+        call print
+        add esp, 4
+        
+    ;Debugeando inicializar zombie
 
-       ; call mmu_inicializar_zombie
+        push 0x400000
+        push 0x00016000
 
-    push mensaje_bienvenida
-    call print
-    add esp, 4
+
+        call mmu_inicializar_zombie
+
+        add esp, 8
 
     ; Inicializar tss
 
@@ -148,19 +139,19 @@ mp:
 
     ; Inicializar la IDT
     
-    push iniciando_idt_msg
-    call print
-    add esp, 4
+        push iniciando_idt_msg
+        call print
+        add esp, 4
 
-    call idt_inicializar
+        call idt_inicializar
 
     ; Cargar IDT
 
-    push cargando_idt_msg
-    call print
-    add esp, 4
+        push cargando_idt_msg
+        call print
+        add esp, 4
 
-    lidt [IDT_DESC]
+        lidt [IDT_DESC]
 
 
     ;prueba de int 0
@@ -173,19 +164,19 @@ mp:
 
     ; Configurar controlador de interrupciones
 
-    call resetear_pic
-    call habilitar_pic
+        call resetear_pic
+        call habilitar_pic
 
-    int 66
+        int 66
 
     ; Cargar tarea inicial
-    xchg bx,bx
+    ;xchg bx,bx
 
 
 
     ; Habilitar interrupciones
 
-    sti
+        sti
 
     ; Saltar a la primera tarea: Idle
 
@@ -201,77 +192,7 @@ mp:
 ;; -------------------------------------------------------------------------- ;;
 
 
-;;;;;;;;;;;;;;;;;;;Funciones Del Kernel;;;;;;;;;;;;;;;;;;
-actualizarPantalla:
-
-    push ebp
-    mov ebp, esp
-    pushad
-
-    xor eax, eax ; fila
-    xor esi, esi ; col
-    xor ecx, ecx ; putero
-
-
-    xor edi, edi
-    xor ebx, ebx
-    xor edx, edx
-
-    mov di, 0x2000 ;caracter nulo(00), fondo verde (A0)
-    mov dx, 0x3000 ;caracter nulo(00), fondo rojo (C0)
-    mov bx, 0x4000 ;caracter nulo(00), fondo azul horrible (B0)
-    ;xchg bx,bx
-
-newLine:
-    mov [gs:ecx], bx
-    add ecx, 2
-    inc eax
-init:
-    mov [gs:ecx], di
-
-    add ecx, 2
-    inc eax
-    cmp eax, 79
-    jnz init
-
-    mov [gs:ecx], dx
-    add ecx, 2
-
-    xor eax, eax
-    inc esi
-    cmp esi, 50
-    jnz newLine
-
-    popad
-    pop ebp
-    ret
-
-lineaApuntada dd 1
-;print(string* str)
-print:
-    push ebp
-    mov ebp, esp
-    pushad
-    mov edi,[ebp+8]
-    ;cuento caracteres
-        sub ecx, ecx
-        sub al, al
-        not ecx
-        cld
-        repne   scasb
-        not ecx
-        dec ecx
-
-    imprimir_texto_mp edi, ecx, 0x20, dword [lineaApuntada],1
-    inc dword [lineaApuntada]
-
-    popad
-    pop ebp
-    ret
-
-
-
-
+%include "screen.asm"
 %include "paging.asm"
 %include "a20.asm"
 extern GDT_DESC
@@ -288,23 +209,10 @@ iniciando_mr_msg db     'Iniciando kernel (Modo Real)...'
 iniciando_mr_len equ    $ - iniciando_mr_msg
 
 iniciando_mp_msg db     'Iniciando kernel (Modo Protegido)...',0
-iniciando_mp_len equ    $ - iniciando_mp_msg
-
 iniciando_vide_msg db   'Iniciando Pantalla...',0
-iniciando_vide_len equ  $ - iniciando_vide_msg
-
 iniciando_idt_msg db   'Iniciando IDT...',0
-iniciando_idt_len equ  $ - iniciando_idt_msg
-
 cargando_idt_msg db   'Cargando IDT...',0
-cargando_idt_len equ  $ - cargando_idt_msg
-
 iniciando_paginacion db "Inicando Paginacion",0
-iniciando_paginacion_len equ $ - iniciando_paginacion
-
 mensaje_bienvenida db "El Senior de los novillos",0
-mensaje_bienvenida_len equ $ - mensaje_bienvenida
-
-ok_msg db 'ok!'
-ok_len equ $ - ok_msg
+ok_msg db 'ok!',0
 ;;

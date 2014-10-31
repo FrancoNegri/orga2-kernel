@@ -53,6 +53,9 @@ pedirPagina_0:
 
     .fin_completar_page_directory:
 
+    xchg bx,bx
+
+
     pop ecx
     pop ebx
     pop ebp
@@ -128,4 +131,9 @@ unmapearPagina:
     mov dword [ebx + eax], 0; desmapeo la pagina
 
     popad
+    ret
+
+global editarGDT
+
+editarGDT:
     ret
