@@ -42,9 +42,9 @@ void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 
 	//copio la tarea en el mapa
 	void *paginaAUX= pedirPagina();
-	mapearPagina(direccionReal, (void*) 0xFFFFF , (void*)0x27000, paginaAUX);
+	mapearPagina(direccionReal, (void*) 0xDC4000 , (void*)0x27000, paginaAUX);
 	//0xDC4000
-	copiarPagina( (void**)codigo, (void**)0xFFFFF);
+	copiarPagina( (void**)codigo, (void**)0xDC4000);
 
 	void * p = (void*) 0x16000;
 
@@ -52,7 +52,7 @@ void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 	fun = p;
 	fun();
 	
-	unmapearPagina( (void*)0xFFFFF, (void*)0x27000,paginaAUX);
+	unmapearPagina( (void*)0xDC4000, (void*)0x27000,paginaAUX);
 
 	return direccionDelDirectorio;
 }

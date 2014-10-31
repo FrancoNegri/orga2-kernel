@@ -68,8 +68,9 @@ mascara: dd 0xFFFFF000
 mapearPagina:
     
     ;xchg bx,bx
-    pushad
+    push ebp
     mov ebp, esp
+    pushad
     mov eax, [ebp+8];direccionReal
     mov edx, [ebp+12];direccionVirtual
     mov edi, [ebp+16];directorioDePaginas
@@ -85,18 +86,20 @@ mapearPagina:
     shr eax, 10; acá tengo el offset de la dir en la pagina
 
     ;tengo que sacarle la ultima parte donde van los flags
-
+    and edx, mascara
     and ebx, mascara
+    
+    mov [ebx + eax], edx; aca mapeo de la pagina a la dirreccion que quiero
+    add dword [ebx + eax], 0x00000003; le digo que esta preente
+
     mov [edi + esi], ebx; aca apunto a la pagina que corresponde
     add dword [ebx + eax], 0x00000003; le digo que esta presente
 
-    and edx, mascara
-    mov [ebx + eax], edx; aca mapeo de la pagina a la dirreccion que quiero
-    add dword [ebx + eax], 0x00000003; le digo que esta preente
 
     ;xchg bx,bx
 
     popad
+    pop ebp
     ret
     ;hacemos shift para sacar el offset
     ;hacemos una mascara para separar el offset del page directory y el page completar page table
@@ -109,11 +112,12 @@ global unmapearPagina
 
 ;void unmapearPagina(void* direccionVirtual, void* directorioDePaginas,void* pagina)
 unmapearPagina:
+    push ebp
+    mov ebp, esp
+    pushad
     mov edx, [esp+8];direccionVirtual
     mov edi, [esp+12];directorioDePaginas
     mov ebx, [esp+16]; pagina
-    pushad
-    mov ebp, esp
 
 
     shr eax, 12; saco el offset
@@ -131,6 +135,7 @@ unmapearPagina:
     mov dword [ebx + eax], 0; desmapeo la pagina
 
     popad
+    pop ebp
     ret
 
 global editarGDT
