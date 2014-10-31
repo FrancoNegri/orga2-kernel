@@ -23,6 +23,7 @@ void *pedirPagina()
 	return dirGlobal;
 }
 
+typedef void (*func_ptr)(void);
 
 void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 {
@@ -37,16 +38,23 @@ void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 		void *direccionVirtual = (void*) 0x400000 + 0x1000*i;
 		mapearPagina(direccionReal, direccionVirtual, direccionDelDirectorio, direccionDePagina); //ponr bien las drecciones reales
 	}
-	return direccionDelDirectorio;
+
 
 	//copio la tarea en el mapa
 	void *paginaAUX= pedirPagina();
-	mapearPagina(direccionReal, (void*) 0xDC4000 , (void*)0x27000, paginaAUX);
-	copiarPagina( (void**)codigo, (void**)0xDC4000);
+	mapearPagina(direccionReal, (void*) 0xFFFFF , (void*)0x27000, paginaAUX);
+	//0xDC4000
+	copiarPagina( (void**)codigo, (void**)0xFFFFF);
 
+	void * p = (void*) 0x16000;
+
+	func_ptr fun;
+	fun = p;
+	fun();
 	
-	
-	unmapearPagina( (void*)0xDC4000, (void*)0x27000,paginaAUX);
+	unmapearPagina( (void*)0xFFFFF, (void*)0x27000,paginaAUX);
+
+	return direccionDelDirectorio;
 }
 
 void copiarPagina(void **src, void **dst)

@@ -27,8 +27,8 @@ page_init:
 	.fin_completar_page_table:
 
 
-	popad
-	ret
+    popad
+    ret
 
 global pedirPagina_0
 
@@ -38,6 +38,8 @@ pedirPagina_0:
     mov ebp, esp
     push ebx
     push ecx
+    
+
 
     xor ecx, ecx
     mov ebx, [ebp+8]
@@ -52,9 +54,6 @@ pedirPagina_0:
         jmp .completar_page_directory
 
     .fin_completar_page_directory:
-
-    xchg bx,bx
-
 
     pop ecx
     pop ebx
@@ -95,6 +94,7 @@ mapearPagina:
     mov [ebx + eax], edx; aca mapeo de la pagina a la dirreccion que quiero
     add dword [ebx + eax], 0x00000003; le digo que esta preente
 
+    ;xchg bx,bx
 
     popad
     ret

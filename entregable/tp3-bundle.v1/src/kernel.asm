@@ -121,9 +121,14 @@ mp:
         
     ;Debugeando inicializar zombie
 
+
+        call mmu_inicializar
+
+        ;xchg bx,bx
+
+
         push 0x400000
         push 0x00016000
-
 
         call mmu_inicializar_zombie
 
@@ -201,6 +206,7 @@ extern idt_inicializar
 extern mmu_inicializar_zombie
 extern habilitar_pic
 extern resetear_pic
+extern mmu_inicializar
 
 ;;
 ;; Seccion de datos.
