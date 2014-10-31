@@ -55,4 +55,7 @@ typedef struct str_tss {
 
 void tss_inicializar();
 
+void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned char *base_31_24, void* tss_inicial);
+
+
 #endif  /* !__TSS_H__ */

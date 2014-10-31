@@ -54,6 +54,7 @@ start:
 
     jmp 0x40:mp
 
+    ;01000000
     ; Establecer selectores de segmentos
 BITS 32
 mp: 
@@ -97,7 +98,6 @@ mp:
     call print
     add esp, 4
 
-    xchg bx,bx
 
     ; Inicializar pantalla
 
@@ -176,9 +176,10 @@ mp:
     call resetear_pic
     call habilitar_pic
 
-    ;int 0x66
+    int 66
 
     ; Cargar tarea inicial
+    xchg bx,bx
 
 
 
