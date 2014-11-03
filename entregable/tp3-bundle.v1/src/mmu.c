@@ -9,6 +9,7 @@
 
 void* dirGlobal;
 void copiarPagina(void **src, void **dst);
+typedef void (*func_ptr)(void);
 
 void mmu_inicializar() 
 {
@@ -23,7 +24,6 @@ void *pedirPagina()
 	return dirGlobal;
 }
 
-typedef void (*func_ptr)(void);
 
 void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 {
@@ -44,6 +44,7 @@ void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 	void *paginaAUX= pedirPagina();
 	mapearPagina(direccionReal, (void*) 0xDC4000 , (void*)0x27000, paginaAUX);
 	//0xDC4000
+	stop();
 	copiarPagina( (void**)codigo, (void**)0xDC4000);
 
 	void * p = (void*) 0x16000;

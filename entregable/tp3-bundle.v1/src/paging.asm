@@ -142,3 +142,9 @@ global editarGDT
 
 editarGDT:
     ret
+
+
+global stop
+stop:
+    xchg bx, bx
+    ret  

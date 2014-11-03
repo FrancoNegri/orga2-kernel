@@ -11,11 +11,25 @@ BITS 32
 sched_tarea_offset:     dd 0x00
 sched_tarea_selector:   dw 0x00
 
-int0_capturada: db "La int 0 fue capturada con exito!"
-int0_capturada_len equ $ - int0_capturada
+int0_capturada: db "Divide Error Exception",0
+int1_capturada: db "Debug Exception",0
+int2_capturada: db "NMI Interrupt",0
+int3_capturada: db "Breakpoint Exception",0
+int4_capturada: db "Overflow Exception",0
+int5_capturada: db "BOUND Range Exceeded Exception!",0
+int6_capturada: db "Invalid Opcode Exception",0
+int7_capturada: db "Device Not Available Exception!",0
+int8_capturada: db "Double Fault Exception",0
+int9_capturada: db "Coprocessor Segment Overrun",0
+int10_capturada: db "invalid TSS",0
+int11_capturada: db "Segment Not Present",0
+int12_capturada: db "Stack Fault Exception!",0
+int14_capturada: db "Page-Fault Exception",0
+int13_capturada: db "General Protection",0
+int17_capturada: db "Alignment Check Exception",0
 
-int13_capturada: db "General Protection"
-int13_capturada_len equ $ - int13_capturada
+
+
 
 ;; PIC
 extern fin_intr_pic1
@@ -39,15 +53,121 @@ isrClock:            db '|/-\'
 ;; -------------------------------------------------------------------------- ;;
 
 global _isr0
+global _isr5
+global _isr8
+global _isr9
+global _isr10
+global _isr11
+global _isr12
 global _isr13
+global _isr14
+global _isr17
+global _isr1
+global _isr2
+global _isr3
+global _isr4
+global _isr6
+global _isr7
 
+
+;en caso de que el error sea en la pila, esto podria traer porblemas
+extern print
 _isr0:
-    imprimir_texto_mp int0_capturada,int0_capturada_len,0x20, 4,1
+    push int0_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr1:
+    push int1_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr2:
+    push int2_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr3:
+    push int3_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr4:
+    push int4_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr5:;BOUND Range Exceeded Exception
+    push int5_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr6:
+    push int6_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr7:
+    push int7_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr8:;Double Fault Exception
+    push int8_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr9:;Coprocessor Segment Overrun
+    push int9_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr10:;invalid TSS
+    push int10_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr11:;Segment Not Present
+    push int11_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr12:;Stack Fault Exception
+    push int12_capturada
+    call print
+    add esp, 4
     jmp $
 
 _isr13:
-    imprimir_texto_mp int13_capturada,int13_capturada_len,0x20, 5,1
+    push int13_capturada
+    call print
+    add esp, 4
     jmp $
+_isr14:
+    push int14_capturada
+    call print
+    add esp, 4
+    jmp $
+
+_isr17:
+    push int17_capturada
+    call print
+    add esp, 4
+    jmp $
+
+
 
 ;;
 ;; Rutina de atención del RELOJ

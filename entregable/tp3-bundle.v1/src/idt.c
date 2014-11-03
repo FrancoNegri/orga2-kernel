@@ -48,8 +48,25 @@ idt_descriptor IDT_DESC = {
         idt[numero].offset_16_31 = (unsigned short) ((unsigned int)(&_isr ## numero) >> 16 & (unsigned int) 0xFFFF); 
 
 void idt_inicializar() {
+    //intel defined
     IDT_ENTRY(0);
+    IDT_ENTRY(1);
+    IDT_ENTRY(2);
+    IDT_ENTRY(3);
+    IDT_ENTRY(4);
+    IDT_ENTRY(5);//BOUND Range Exceeded Exception
+    IDT_ENTRY(6);
+    IDT_ENTRY(7);
+    IDT_ENTRY(8);//Double Fault Exception
+    IDT_ENTRY(9);//Coprocessor Segment Overrun
+    IDT_ENTRY(10);//invalid TSS
+    IDT_ENTRY(11);//Segment Not Present
+    IDT_ENTRY(12);//Stack Fault Exception
     IDT_ENTRY(13);
+    IDT_ENTRY(14);
+    IDT_ENTRY(17);
+
+    //user defined
     IDT_ENTRY(32);
     IDT_ENTRY(33);
     IDT_ENTRY(66);
