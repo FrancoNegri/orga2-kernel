@@ -126,14 +126,6 @@ mp:
 
         ;xchg bx,bx
 
-
-        push 0x400000
-        push 0x00016000
-
-        call mmu_inicializar_zombie
-
-        add esp, 8
-
     ; Inicializar tss
 
 
@@ -185,6 +177,14 @@ mp:
 
     ; Saltar a la primera tarea: Idle
 
+
+    push 0x400000
+    push 0x00016000
+
+    call mmu_inicializar_zombie
+
+    add esp, 8
+
     ; Ciclar infinitamente (por si algo sale mal...)
 
     mov eax, 0xFFFF
@@ -196,7 +196,7 @@ mp:
 
 ;; -------------------------------------------------------------------------- ;;
 
-  
+
 
 
 %include "screen.asm"

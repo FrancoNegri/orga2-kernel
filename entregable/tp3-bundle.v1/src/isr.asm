@@ -24,8 +24,10 @@ int9_capturada: db "Coprocessor Segment Overrun",0
 int10_capturada: db "invalid TSS",0
 int11_capturada: db "Segment Not Present",0
 int12_capturada: db "Stack Fault Exception!",0
-int14_capturada: db "Page-Fault Exception",0
+int14_capturada: db "Page-Fault Exception"
+int14_capturada_len equ $ - int14_capturada
 int13_capturada: db "General Protection",0
+int13_capturada_len equ $ - int13_capturada
 int17_capturada: db "Alignment Check Exception",0
 
 
@@ -36,6 +38,8 @@ extern fin_intr_pic1
 
 ;; Sched
 extern sched_proximo_indice
+
+extern print_hex
 
 ;;
 ;; Definición de MACROS
@@ -151,14 +155,24 @@ _isr12:;Stack Fault Exception
     jmp $
 
 _isr13:
-    push int13_capturada
-    call print
-    add esp, 4
+    imprimir_texto_mp int13_capturada, int13_capturada_len, 0x07, 20, 30
     jmp $
+
 _isr14:
-    push int14_capturada
-    call print
-    add esp, 4
+    ;algo malo pasa con la paginacion, primero la apago
+    mov eax, cr0                
+    and  eax, 0x7FFFFFFF     
+    mov cr0, eax
+
+    imprimir_texto_mp int14_capturada, int14_capturada_len, 0x07, 20, 30
+
+    mov edi, [esp+4]
+    push 0x07
+    push 21
+    push 30
+    push 4
+    push dword [esp+4]
+    call print_hex
     jmp $
 
 _isr17:
