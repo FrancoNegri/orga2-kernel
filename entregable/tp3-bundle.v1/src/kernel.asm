@@ -118,13 +118,6 @@ mp:
         push mensaje_bienvenida
         call print
         add esp, 4
-        
-    ;Debugeando inicializar zombie
-
-
-        call mmu_inicializar
-
-        ;xchg bx,bx
 
     ; Inicializar tss
 
@@ -177,9 +170,10 @@ mp:
 
     ; Saltar a la primera tarea: Idle
 
+    call mmu_inicializar
 
-    push 0x400000
     push 0x00016000
+    push 0x400000
 
     call mmu_inicializar_zombie
 
