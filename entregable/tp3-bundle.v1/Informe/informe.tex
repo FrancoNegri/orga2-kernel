@@ -73,9 +73,12 @@ En el presente trabajo se describe el desarrolo del Kernel desarrollado para una
 
 \section{Objetivos generales}
 
-\clearpage
+El objetivo de este trabajo practico, partiendo de un procesador intel de 32-bits, generar un kernel capaz de gestionar memoria entre diferentes tareas, correrlas de manera concurrente, y resolver las diferentes problematicas que puedan surgir al momento de ejecución.
 
-\section{Preambulo}
+Para ello utilizaremos las diversas herramientas que intel pone a nuestra disposicion en modo protegido: Usaremos segmentacion y paginación para controlar el privilegio con el que las tareas se ejecutarán.
+Utilizaremos interrupciones del procesador que permitirán, tanto reaccionar de manera apropiada cuando se produzca un error en tiempo de ejecución, obtener input del teclado y gestionar un task manager que nos perimita ejecutar tareas de manera concurrente.
+
+En las siguientes secciones se detallará de manera mas elaborada el funcionamiento e implementación de cada una de las partes principales del sistema.
 
 \clearpage
 
