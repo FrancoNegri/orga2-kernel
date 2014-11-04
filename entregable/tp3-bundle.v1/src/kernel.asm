@@ -62,18 +62,13 @@ mp:
         ;mov ax, 0x40
         ;mov cs, ax  ; {Index: 8, gdt/ldt: 0, rpl = 0} kernel code, se setea con jmp no es necesario
 
+        ;todos los segmenos apuntan al mismo descriptor (necesario para convención C)
         mov ax, 0x50
-        mov es, ax  ; {Index: 9, gdt/ldt: 0, rpl = 3} App code
-
-        mov ax, 0x50; este es el posta
-        mov ds, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} kernel data
-        mov ss, ax  ; {Index: 10, gdt/ldt: 0, rpl = 0} kernel stack
-        
-        mov ax, 0x50 
-        mov fs, ax ;{Index: 11, gdt/ldt: 0, rpl = 3} App data
-        
-        mov ax, 0x50
-        mov gs, ax ;{Index: 12, gdt/ldt: 0, rpl = 0} video data
+        mov es, ax
+        mov ds, ax  
+        mov ss, ax  
+        mov fs, ax 
+        mov gs, ax 
 
 
     ; Establecer la base de la pila
@@ -121,7 +116,7 @@ mp:
 
     ; Inicializar tss
 
-
+        call tss_inicializar
 
     ; Inicializar tss de la tarea Idle
 
@@ -203,7 +198,7 @@ extern mmu_inicializar_zombie
 extern habilitar_pic
 extern resetear_pic
 extern mmu_inicializar
-
+extern tss_inicializar
 ;;
 ;; Seccion de datos.
 ;; -------------------------------------------------------------------------- ;;

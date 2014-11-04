@@ -57,3 +57,21 @@ void tss_inicializar() {
 	    editarGDT( &gdt[GDT_IDX_TSS_1].base_0_15,&gdt[GDT_IDX_TSS_1].base_23_16,&gdt[GDT_IDX_TSS_1].base_31_24, &tss_idle);
 }
 
+
+void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned char *base_31_24, void* tss_inicial)
+{
+	unsigned long int aux = (unsigned long int) tss_inicial;
+	aux = aux << 16;
+	aux = aux >> 16;
+	*base_0_15 = (unsigned short) aux;
+
+	aux = (unsigned long int) tss_inicial;
+	aux = aux << 8;
+	aux = aux >> 24;
+	*base_23_16 = (unsigned char) aux;
+
+	aux = (unsigned long int) tss_inicial;
+	aux = aux >> 24;
+	*base_31_24 = (unsigned short) aux;
+	return;
+}

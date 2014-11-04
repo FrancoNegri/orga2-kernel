@@ -13,8 +13,21 @@
 #include "tss.h"
 #include "game.h"
 
+void copiarPagina(void **src, void **dst);
+
+void pedirPag(void** dir);
+
+void mapearAPagina01(void *direccionReal, void* dirVirtual,void** paginaAUX);
+
+void mapearADirectorio01(void *dir,void* pt, void** pd);
+
 void mmu_inicializar();
-void *mmu_inicializar_zombie(void* direccionReal, void* codigo);
+
+void *pedirPagina();
+
+void unmapearAPagina(void* direccionVirtual,void** pagina);
+
+void unmapearADirectorio(void* direccionVirtual,void** direcorio);
 
 #endif	/* !__MMU_H__ */
 

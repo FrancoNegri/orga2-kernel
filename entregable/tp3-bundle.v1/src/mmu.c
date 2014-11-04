@@ -6,13 +6,10 @@
 */
 #include "mmu.h"
 
+//para testear si salta bien
+//typedef void (*func_ptr)(void);
+
 void* dirGlobal;
-void copiarPagina(void **src, void **dst);
-typedef void (*func_ptr)(void);
-void pedirPag(void** dir);
-void mapearAPagina01(void *direccionReal, void* dirVirtual,void** paginaAUX);
-void mapearADirectorio01(void *dir,void* pt, void** pd);
-void mmu_inicializar();
 
 void mmu_inicializar() 
 {
@@ -60,7 +57,8 @@ void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 	//fun = p;
 	//fun();
 
-	unmapearAPagina();	
+	unmapearAPagina((void*)0xDC4000, paginaAUX);
+	unmapearADirectorio((void*)0xDC4000, (void*)0x27000);
 
 	return direccionDelDirectorio;
 }
@@ -108,8 +106,22 @@ void mapearADirectorio01(void *dir,void* pt, void** pd)
 	pd[aux1]= (void*) aux2;
 	return;
 }
-void unmapearAPagina(void* direccionVirtual,void* pagina);
+void unmapearAPagina(void* direccionVirtual,void** pagina)
+{
+	long int aux1 = (long int) direccionVirtual;
+	aux1 = aux1 << 10;
+	aux1 = aux1 >> 22;
 
-void unmapearADirectorio(void* direccionVirtual,void* direcorio);
+	pagina[aux1]= (void*) 0x2;
+	return;
+}
+
+void unmapearADirectorio(void* direccionVirtual,void** direcorio)
+{
+	long int aux1 = (long int) direccionVirtual;
+	aux1 = aux1 >> 22;
+	direcorio[aux1]= (void*) 0x2;
+	return;
+}
 
 /*para mapear las paginas del zombie, vamos a tener que tomar el ancho de fila (78 x 2^10 (1 kb) * 4 )*/

@@ -33,7 +33,7 @@ page_init:
     popad
     ret
 
-global editarGDT
+;global editarGDT
 
 editarGDT:
     ret
