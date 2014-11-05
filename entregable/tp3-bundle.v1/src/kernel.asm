@@ -118,6 +118,19 @@ mp:
 
         call tss_inicializar
 
+        call cargarTSS_zombie
+
+        ;test tss
+
+
+        xchg bx,bx
+
+        mov ax,0x68
+        LTR ax
+        jmp 0x70:0
+
+        ;1101000
+
     ; Inicializar tss de la tarea Idle
 
     ; Inicializar el scheduler
@@ -199,6 +212,7 @@ extern habilitar_pic
 extern resetear_pic
 extern mmu_inicializar
 extern tss_inicializar
+extern cargarTSS_zombie
 ;;
 ;; Seccion de datos.
 ;; -------------------------------------------------------------------------- ;;

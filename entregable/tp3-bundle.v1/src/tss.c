@@ -15,7 +15,7 @@ tss tss_zombisB[CANT_ZOMBIS];
 
 void tss_inicializar() {
 		tss_idle.esp0 = 0x27000 ;
-		//tss_idle.ss0;// que va???
+		tss_idle.ss0 = 0x50;// que va???
 		tss_idle.esp1 = 0x27000;
 		//tss_idle.ss1; // que va???
 		tss_idle.esp2 = 0x27000;
@@ -40,7 +40,7 @@ void tss_inicializar() {
 		tss_inicial.esp2 = 0x27000;
 		//tss_inicial.ss2;// que va???
 		tss_inicial.cr3 = 0x27000;
-		tss_inicial.eip = 0x16000;
+		tss_inicial.eip = 0x17000;
 		tss_inicial.eflags = 0x0002;
 		tss_inicial.esp = 0x27000;
 		tss_inicial.ebp = 0x27000;
@@ -58,20 +58,97 @@ void tss_inicializar() {
 }
 
 
-void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned char *base_31_24, void* tss_inicial)
+void cargarTSS_zombie()
 {
-	unsigned long int aux = (unsigned long int) tss_inicial;
+	int i;
+	for(i = 15; i < GDT_COUNT; i++)
+	{
+		gdt[i].limit_0_15 = 0x0;
+		gdt[i].base_0_15 = 0x0;
+		gdt[i].base_23_16 = 0x0;
+		gdt[i].type = 0x09;
+		gdt[i].s = 0x0;
+		gdt[i].dpl = 0x0;
+		gdt[i].p = 0x1;
+		gdt[i].limit_16_19 = 0x00;
+		gdt[i].avl = 0x0;
+		gdt[i].l = 0x0;
+		gdt[i].db = 0x1;
+		gdt[i].g = 0x0;
+		gdt[i].base_31_24 = 0x0;
+	}
+
+	for(i = 0; i < CANT_ZOMBIS; i++)
+	{
+		
+		tss_zombisA[i].esp0 = 0x27000 ;
+		tss_zombisA[i].ss0 = 0x50;// que va???
+		tss_zombisA[i].esp1 = 0x27000;
+		//tss_idle.ss1; // que va???
+		tss_zombisA[i].esp2 = 0x27000;
+		//tss_idle.ss2;// que va???
+		tss_zombisA[i].cr3 = 0x00000; //se completa cuando creamos un zombie nuevo
+		tss_zombisA[i].eip = 0x08000000;
+		tss_zombisA[i].eflags = 0x202;
+		tss_zombisA[i].esp = 0x08001000;
+		tss_zombisA[i].ebp = 0x08001000;
+		tss_zombisA[i].es = 0x58;
+		tss_zombisA[i].cs = 0x48;
+		tss_zombisA[i].ss = 0x58;
+		tss_zombisA[i].ds = 0x58;
+		tss_zombisA[i].fs = 0x58;
+		tss_zombisA[i].gs = 0x58;
+		editarGDT(&gdt[i+15].base_0_15, &gdt[i+15].base_23_16, &gdt[i+15].base_31_24, &tss_zombisA[i]);
+	}
+
+	for(i = 0; i < CANT_ZOMBIS; i++)
+    {
+        
+        tss_zombisB[i].esp0 = 0x27000 ;
+        tss_zombisB[i].ss0 = 0x50;// que va???
+        tss_zombisB[i].esp1 = 0x27000;
+        //tss_idle.ss1; // que va???
+        tss_zombisB[i].esp2 = 0x27000;
+        //tss_idle.ss2;// que va???
+        tss_zombisB[i].cr3 = 0x00000; //se completa cuando creamos un zombie nuevo
+        tss_zombisB[i].eip = 0x08000000;
+        tss_zombisB[i].eflags = 0x202;
+        tss_zombisB[i].esp = 0x08001000;
+        tss_zombisB[i].ebp = 0x08001000;
+        tss_zombisB[i].es = 0x58;
+        tss_zombisB[i].cs = 0x48;
+        tss_zombisB[i].ss = 0x58;
+        tss_zombisB[i].ds = 0x58;
+        tss_zombisB[i].fs = 0x58;
+        tss_zombisB[i].gs = 0x58;
+        editarGDT(&gdt[i+23].base_0_15, &gdt[i+23].base_23_16, &gdt[i+23].base_31_24, &tss_zombisB[i]);
+    }
+}
+
+//1011000
+
+void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned char *base_31_24, void* tss)
+{
+	unsigned  int aux = (unsigned  int) tss;
 	aux = aux << 16;
 	aux = aux >> 16;
 	*base_0_15 = (unsigned short) aux;
 
-	aux = (unsigned long int) tss_inicial;
+	aux = (unsigned  int) tss;
 	aux = aux << 8;
 	aux = aux >> 24;
 	*base_23_16 = (unsigned char) aux;
 
-	aux = (unsigned long int) tss_inicial;
+	aux = (unsigned int) tss;
 	aux = aux >> 24;
-	*base_31_24 = (unsigned short) aux;
+	*base_31_24 = (unsigned char) aux;
 	return;
 }
+
+//la tarea tiene rpl = 3
+//el nivel con el que quiero pedir para axceder es nivel 3?
+//tss de las tareas -> tiene un nivel de privilegio
+//dpl = 0, sinó las tareas podrían hacer task switch
+//tres cosas con dpl = 3 sd y cs entrada a la idt para mover.
+//esp0 = nueva pagina libre (pero al final o sea +1000)
+//ss0 es el selector de segmento de nivel 0 -> rpl 0
