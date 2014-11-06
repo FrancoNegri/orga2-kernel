@@ -68,7 +68,9 @@ extern fin_intr_pic1
 ;; Sched
 extern sched_proximo_indice
 
+;screen.c
 extern print_hex
+extern moverJugadorA
 
 ;;
 ;; Definición de MACROS
@@ -299,7 +301,7 @@ _isr33:
     pushad
     in al, 0x60
     cmp al, A
-    jz .A
+    jz .fin
     cmp al, B
     jz .fin
     cmp al, C
@@ -345,9 +347,13 @@ _isr33:
     cmp al, V
     jz .fin
     jmp .fin
-.A:
-    call moverDerecha
+.W:
+    ; moverJugadorA(1);
+    push 0x1
+    call moverJugadorA
+    add esp, 4
     jmp .fin
+
 .fin:
     call fin_intr_pic1
     popad

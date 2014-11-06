@@ -85,7 +85,9 @@ mp:
 
     ; Inicializar pantalla
 
-        call actualizarPantalla
+
+        call inicializarMapa
+        call actualizarFrame
 
         push iniciando_vide_msg
         call print
@@ -199,6 +201,9 @@ extern habilitar_pic
 extern resetear_pic
 extern mmu_inicializar
 extern tss_inicializar
+
+extern inicializarMapa
+extern actualizarFrame
 ;;
 ;; Seccion de datos.
 ;; -------------------------------------------------------------------------- ;;
