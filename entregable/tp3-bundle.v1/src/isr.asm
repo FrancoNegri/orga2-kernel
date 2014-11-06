@@ -70,7 +70,17 @@ extern sched_proximo_indice
 
 ;screen.c
 extern print_hex
-extern moverJugadorA
+
+extern game_actualizarFrame
+
+extern game_cambiarClaseA_adelante
+extern game_cambiarClaseA_atras
+extern game_moverJugadorA
+
+extern game_moverJugadorB
+extern game_cambiarClaseB_adelante
+extern game_cambiarClaseB_atras
+
 
 ;;
 ;; Definición de MACROS
@@ -300,14 +310,16 @@ global _isr33
 _isr33:
     pushad
     in al, 0x60
+    cmp al, W
+    jz .W
     cmp al, A
-    jz .fin
+    jz .A
     cmp al, B
     jz .fin
     cmp al, C
     jz .fin
     cmp al, D
-    jz .fin
+    jz .D
     cmp al, E
     jz .fin
     cmp al, F
@@ -317,13 +329,13 @@ _isr33:
     cmp al, H
     jz .fin
     cmp al, I
-    jz .fin
+    jz .I
     cmp al, J
-    jz .fin
+    jz .J
     cmp al, K
-    jz .fin
+    jz .K
     cmp al, L
-    jz .fin
+    jz .L
     cmp al, M
     jz .fin
     cmp al, N
@@ -337,7 +349,7 @@ _isr33:
     cmp al, R
     jz .fin
     cmp al, S
-    jz .fin
+    jz .S
     cmp al, T
     jz .fin
     cmp al, Y
@@ -347,11 +359,44 @@ _isr33:
     cmp al, V
     jz .fin
     jmp .fin
+
+
+.I:
+    ; moverJugadorA(1);
+    push -1
+    call game_moverJugadorB
+    add esp, 4
+    jmp .fin
+.K:
+    push 1
+    call game_moverJugadorB
+    add esp, 4
+    jmp .fin
+.L:
+    call game_cambiarClaseB_adelante
+    jmp .fin
+
+.J:
+    call game_cambiarClaseB_atras  
+    jmp .fin
+
 .W:
     ; moverJugadorA(1);
-    push 0x1
-    call moverJugadorA
+    push -1
+    call game_moverJugadorA
     add esp, 4
+    jmp .fin
+.S:
+    push 1
+    call game_moverJugadorA
+    add esp, 4
+    jmp .fin
+.D:
+    call game_cambiarClaseA_adelante
+    jmp .fin
+
+.A:
+    call game_cambiarClaseA_atras  
     jmp .fin
 
 .fin:
@@ -393,6 +438,9 @@ _isr66:
 ;; -------------------------------------------------------------------------- ;;
 proximo_reloj:
         pushad
+
+        call game_actualizarFrame
+
         inc DWORD [isrnumero]
         mov ebx, [isrnumero]
         cmp ebx, 0x4

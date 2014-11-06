@@ -57,5 +57,7 @@ void tss_inicializar();
 
 void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned char *base_31_24, void* tss_inicial);
 
+void cargarTSS_zombie();
+
 
 #endif  /* !__TSS_H__ */

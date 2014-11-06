@@ -86,8 +86,7 @@ mp:
     ; Inicializar pantalla
 
 
-        call inicializarMapa
-        call actualizarFrame
+        call game_inicializarMapa
 
         push iniciando_vide_msg
         call print
@@ -119,6 +118,18 @@ mp:
     ; Inicializar tss
 
         call tss_inicializar
+
+        call cargarTSS_zombie
+
+        ;test tss
+
+        ;xchg bx,bx
+
+        mov ax,0x68
+        LTR ax
+        ;jmp 0x70:0
+
+        ;1101000
 
     ; Inicializar tss de la tarea Idle
 
@@ -201,9 +212,9 @@ extern habilitar_pic
 extern resetear_pic
 extern mmu_inicializar
 extern tss_inicializar
-
-extern inicializarMapa
-extern actualizarFrame
+extern game_inicializarMapa
+extern game_actualizarFrame
+extern cargarTSS_zombie
 ;;
 ;; Seccion de datos.
 ;; -------------------------------------------------------------------------- ;;

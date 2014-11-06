@@ -13,7 +13,22 @@
 
 typedef enum direccion_e { IZQ = 0xAAA, DER = 0x441, ADE = 0x83D, ATR = 0x732 } direccion;
 
-void game_jugador_mover(unsigned int jugador, unsigned int value);
+
+int game_zombieEnEstadoValido(short int coordenadaZombieX, short int coordenadaZombieY);
+
+void game_moverJugadorA(int cantidadPosiciones);
+
+void game_moverJugadorB(int cantidadPosiciones);
+
+int game_obtenerCoordenadaYjugadorA();
+
+int game_obtenerCoordenadaYjugadorB();
+
+void game_actualizarFrame();
+
+void game_cambiarClaseA_atras();
+
+void game_cambiarClaseA_adelante();
 
 void game_lanzar_zombi(unsigned int jugador);
 

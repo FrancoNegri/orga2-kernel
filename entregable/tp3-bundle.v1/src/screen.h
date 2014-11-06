@@ -24,12 +24,5 @@ void print(const char * text, unsigned int x, unsigned int y, unsigned short att
 
 void print_hex(unsigned int numero, int size, unsigned int x, unsigned int y, unsigned short attr);
 
-void moverJugadorA(int cantidadPosiciones);
-
-void moverJugadorB(int cantidadPosiciones);
-
-int obtenerCoordenadaYjugadorA();
-
-int obtenerCoordenadaYjugadorB();
 
 #endif  /* !__SCREEN_H__ */
