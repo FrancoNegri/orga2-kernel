@@ -19,7 +19,13 @@
 #define MAGO 0x074D
 #define GUERRERO 0x0747
 
+
+#define CLOCK_MUERTO 0
+
 #define LIMITE_DEL_TABLERO 44
+
+#define FILA_PARA_NUMERO_DE_ZOMBIE 45
+#define FILA_PARA_CLOCKS 47
 
 int coordenadaJugadorAY;
 int coordenadaJugadorBY;
@@ -37,6 +43,17 @@ int coordenadaZombieBY[CANT_ZOMBIS];
 short int claseDeZombieA[CANT_ZOMBIS];
 short int claseDeZombieB[CANT_ZOMBIS];
 
+int clockZombieA[CANT_ZOMBIS];
+int clockZombieB[CANT_ZOMBIS];
+
+char clockZ[] = {'x', '/', '|', '\\', '-', '/', '|', '\\', '-'};
+
+int puntajeA;
+int puntajeB;
+
+int cantidadDeZombiesDisponiblesA;
+int cantidadDeZombiesDisponiblesB;
+
 //graficos del juego
 
 void game_inicializarMapa()
@@ -48,26 +65,39 @@ void game_inicializarMapa()
     claseDeProximoZombieA = GUERRERO;
     claseDeProximoZombieB = GUERRERO;
 
+    puntajeA=0;
+    puntajeB=0;
+
+    cantidadDeZombiesDisponiblesA = CANT_ZOMBIS;
+	cantidadDeZombiesDisponiblesB = CANT_ZOMBIS;
+
     //inicializo los zombies fuera del mapa y en estados invalidos
     for(i = 0; i < CANT_ZOMBIS; i++)
     {
         coordenadaZombieAX[i] = -1; 
         coordenadaZombieAY[i] = -1;
         claseDeZombieA[i] = 0;
+        clockZombieA[i] = CLOCK_MUERTO;
 
 
         coordenadaZombieBX[i] = -1;
         coordenadaZombieBY[i] = -1;
         claseDeZombieB[i] = 0;
+        clockZombieB[i] = CLOCK_MUERTO;
     }
     game_actualizarFrame();
     return;
 }
 
 
+//esta función imprime tooooooodo el mapa
+//puede que haya una manera mas performante
+//ver cada cuanto hay que llamarla para obtener un buen desempeño
+//30 o 60 frames per second? el gran dilema
 void game_actualizarFrame()
 {
     int i,j;
+    short int aux;
     short int *puntero = (short int *) 0xB8000;
     short int (*pixel)[80] = (short int (*)[80]) puntero;
 
@@ -97,7 +127,7 @@ void game_actualizarFrame()
     pixel[coordenadaJugadorBY][79] = claseDeProximoZombieB;
 
 
-    //para cada zombie
+    //para cada zombie actualizo su posicion
     for(i = 0; i < CANT_ZOMBIS; i++)
     {
         if(game_zombieEnEstadoValido(coordenadaZombieAX[i],coordenadaZombieAY[i]))
@@ -110,6 +140,47 @@ void game_actualizarFrame()
             pixel[coordenadaZombieBX[i]][coordenadaZombieBY[i]] = claseDeZombieB[i];
         }
     }
+
+    for(i = 0; i < CANT_ZOMBIS ; i++)
+    {
+    	//actualizo los relojes para los zombies A
+	    aux = (short int) clockZ[clockZombieA[i]];
+	    aux += 0x0700;
+	    pixel[FILA_PARA_NUMERO_DE_ZOMBIE][i*3 + 5] = i + 0x0730; //esta constante es para que me quede justo en el ascci apropiado, 0x07 es el color y 0x30 para el caracter numero
+	    pixel[FILA_PARA_CLOCKS][i*3 + 5] = aux; 
+
+
+	    //actializo los relojes para zombies B
+	    aux = (short int) clockZ[clockZombieA[i]];
+	    aux += 0x0700;
+	    pixel[FILA_PARA_NUMERO_DE_ZOMBIE][i*3 + 55] = i + 0x0730; 
+	    pixel[FILA_PARA_CLOCKS][i*3 + 55] = aux;	
+    }
+
+
+    //esto es para el puntaje, imprimo un cuadradito rojo y uno azul
+    for(i = LIMITE_DEL_TABLERO; i < 50; i++)
+    {
+    	for(j = 33; j < 38; j++)
+    	{
+    		pixel[i][j] = AZUL;
+    	}
+    }
+
+    for(i = LIMITE_DEL_TABLERO; i < 50 ; i++)
+    {
+    	for(j = 43; j < 48; j++)
+    	{
+    		pixel[i][j] = ROJO;
+    	}
+    }
+
+    pixel[47][35] = puntajeA + 0x0730;
+    pixel[47][45] = puntajeB + 0x0730;
+
+    pixel[47][30] = cantidadDeZombiesDisponiblesA + 0x0730;
+    pixel[47][51] = cantidadDeZombiesDisponiblesB + 0x0730;
+
 }
 
 int game_zombieEnEstadoValido(short int coordenadaZombieX, short int coordenadaZombieY)
@@ -220,6 +291,22 @@ void game_cambiarClaseB_adelante()
             claseDeProximoZombieB = MAGO;
             break;
     }
+}
+
+void game_actualizarClockZombieA(int numeroDeZombie)
+{
+	if(clockZombieA[numeroDeZombie] != CLOCK_MUERTO)
+		clockZombieA[numeroDeZombie]++;
+	if(clockZombieA[numeroDeZombie] > 8)
+		clockZombieA[numeroDeZombie] = 1;
+}
+
+void game_actualizarClockZombieB(int numeroDeZombie)
+{
+	if(clockZombieB[numeroDeZombie] != CLOCK_MUERTO)
+		clockZombieB[numeroDeZombie]++;
+	if(clockZombieB[numeroDeZombie] > 8)
+		clockZombieB[numeroDeZombie] = 0;
 }
 
 void game_lanzar_zombi(unsigned int jugador) {

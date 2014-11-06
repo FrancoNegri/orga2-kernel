@@ -226,10 +226,7 @@ _isr32:
 ;;
 ;; Rutina de atención del TECLADO
 ;; -------------------------------------------------------------------------- ;;
-%define IZQ 0xAAA
-%define DER 0x441
-%define ADE 0x83D
-%define ATR 0x732
+
 
 
 %define Tab 0x0f
@@ -404,24 +401,16 @@ _isr33:
     popad
     iret
 
-moverDerecha:
-    pushad
-    mov eax, 79
-    imul dword [coordenadaY]
-    mov ecx, [coordenadaX]
-    add ecx,2
-    mov [coordenadaX], ecx
-    sub ecx, 2
-    add ecx, eax
-    mov di, 0x3000
-    mov [gs:ecx], di
-    popad
-    ret
 
 
 ;;
 ;; Rutinas de atención de las SYSCALLS
 ;; -------------------------------------------------------------------------- ;;
+%define IZQ 0xAAA
+%define DER 0x441
+%define ADE 0x83D
+%define ATR 0x732
+
 global _isr66
 _isr66:
     pushad
@@ -436,9 +425,12 @@ _isr66:
 
 ;; Funciones Auxiliares
 ;; -------------------------------------------------------------------------- ;;
+;solo tiene que llamarse por la interrupcion, sino la pantalla se va a actualizar de manera random
+;not good
 proximo_reloj:
         pushad
 
+        ;con cada tic del reloj, actualizo la pantalla
         call game_actualizarFrame
 
         inc DWORD [isrnumero]
