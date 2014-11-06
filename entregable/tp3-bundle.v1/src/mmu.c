@@ -24,7 +24,7 @@ void *pedirPagina()
 	return dirGlobal;
 }
 
-void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
+void *mmu_inicializar_zombie(void** direccionReal, void* codigo)
 {
 	int i;
 	void *direccionDelDirectorio = pedirPagina();
@@ -37,7 +37,7 @@ void *mmu_inicializar_zombie(void* direccionReal, void* codigo)
 	for(i = 0; i < 9; i++)
 	{
 		void *direccionVirtual = (void*) 0x400000 + 0x1000*i;
-		mapearAPagina01(direccionReal, direccionVirtual, direccionDePagina); //ponr bien las drecciones reales
+		mapearAPagina01(direccionReal[i], direccionVirtual, direccionDePagina); //ponr bien las drecciones reales
 	}
 
 	//copio la tarea en el mapa

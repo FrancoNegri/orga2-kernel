@@ -5,6 +5,9 @@
 */
 
 #include "game.h"
+#include "tss.h"
+
+void mapearDireccionesParaA(int coordenadaJugadorAY,void **direccionReal);
 
 //define colores
 #define ROJO 0x3000
@@ -132,12 +135,12 @@ void game_actualizarFrame()
     {
         if(game_zombieEnEstadoValido(coordenadaZombieAX[i],coordenadaZombieAY[i]))
         {
-            pixel[coordenadaZombieAX[i]][coordenadaZombieAY[i]] = claseDeZombieA[i];
+            pixel[coordenadaZombieAY[i]][coordenadaZombieAX[i]] = claseDeZombieA[i];
         }
 
         if(game_zombieEnEstadoValido(coordenadaZombieBX[i],coordenadaZombieBY[i]))
         {
-            pixel[coordenadaZombieBX[i]][coordenadaZombieBY[i]] = claseDeZombieB[i];
+            pixel[coordenadaZombieBY[i]][coordenadaZombieBX[i]] = claseDeZombieB[i];
         }
     }
 
@@ -151,7 +154,7 @@ void game_actualizarFrame()
 
 
 	    //actializo los relojes para zombies B
-	    aux = (short int) clockZ[clockZombieA[i]];
+	    aux = (short int) clockZ[clockZombieB[i]];
 	    aux += 0x0700;
 	    pixel[FILA_PARA_NUMERO_DE_ZOMBIE][i*3 + 55] = i + 0x0730; 
 	    pixel[FILA_PARA_CLOCKS][i*3 + 55] = aux;	
@@ -180,6 +183,8 @@ void game_actualizarFrame()
 
     pixel[47][30] = cantidadDeZombiesDisponiblesA + 0x0730;
     pixel[47][51] = cantidadDeZombiesDisponiblesB + 0x0730;
+
+
 
 }
 
@@ -309,7 +314,80 @@ void game_actualizarClockZombieB(int numeroDeZombie)
 		clockZombieB[numeroDeZombie] = 0;
 }
 
-void game_lanzar_zombi(unsigned int jugador) {
+#define JUGADORA 1
+#define JUGADORB 0
+
+void *direccionReal[9];
+
+void game_lanzar_zombi(unsigned int jugador) 
+{
+	int i;
+	void *cr3;
+	if(jugador == JUGADORA)
+	{
+		for(i=0; i < CANT_ZOMBIS; i++)
+		{
+			//esto quiere decir que el slot esta vacio, lo uso para el zombie nuevo
+			if(clockZombieA[i] == CLOCK_MUERTO)
+			{
+				cantidadDeZombiesDisponiblesA--;
+				//lo saco de su estado muerto
+				clockZombieA[i] = 1;
+				//calculo las direcciones para A
+				mapearDireccionesParaA(coordenadaJugadorAY,direccionReal);
+				//ahora calculo las paginas realas
+				cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x1600);
+
+				mapearCr3Tss(cr3, &tss_zombisA[i]);
+
+
+				coordenadaZombieAY[i] = coordenadaJugadorAY;
+				coordenadaZombieAX[i] = 1;
+				claseDeZombieA[i] = claseDeProximoZombieA;
+				return;
+			}
+		}
+	}
 }
-void game_move_current_zombi(direccion dir) {
+
+
+
+void mapearDireccionesParaA(int coordenadaJugadorAY,void **direccionReal)
+{
+	int i;
+	for(i = 0; i< 9; i++)
+	{
+		direccionReal[i] = (void*) 0x400000;
+	}
+}
+
+void game_move_current_zombi(direccion dir) 
+{
+}
+
+int proximoTurno = 0;
+
+unsigned short game_proximo_zombie()
+{
+	int i;
+	if(proximoTurno == 0)
+	{
+		proximoTurno = 1;
+		for(i = 0; i < CANT_ZOMBIS; i++)
+		{
+			if(clockZombieA[i] != CLOCK_MUERTO)
+				return i+15;
+		}
+	}
+
+	if(proximoTurno == 1)
+	{
+		proximoTurno = 0;
+		for(i = 0; i < CANT_ZOMBIS; i++)
+		{
+			if(clockZombieB[i] != CLOCK_MUERTO)
+				return i+23;
+		}
+	}
+	return INDICE_NO_ENCONTRADO;
 }

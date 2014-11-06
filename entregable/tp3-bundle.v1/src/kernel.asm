@@ -165,8 +165,6 @@ mp:
         call resetear_pic
         call habilitar_pic
 
-        int 66
-
     ; Cargar tarea inicial
     ;xchg bx,bx
 
@@ -180,12 +178,12 @@ mp:
 
     call mmu_inicializar
 
-    push 0x00016000
-    push 0x400000
+    ;push 0x00016000
+    ;push 0x400000
 
-    call mmu_inicializar_zombie
+    ;call mmu_inicializar_zombie
 
-    add esp, 8
+    ;add esp, 8
 
     ; Ciclar infinitamente (por si algo sale mal...)
 

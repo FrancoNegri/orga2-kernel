@@ -10,6 +10,7 @@
 
 #include "screen.h"
 #include "tss.h"
+#include "game.h"
 
 unsigned short sched_proximo_indice();
 

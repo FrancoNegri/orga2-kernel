@@ -10,8 +10,7 @@
 tss tss_inicial;
 tss tss_idle;
 
-tss tss_zombisA[CANT_ZOMBIS];
-tss tss_zombisB[CANT_ZOMBIS];
+
 
 void tss_inicializar() {
 		tss_idle.esp0 = 0x27000 ;
@@ -22,7 +21,7 @@ void tss_inicializar() {
 		//tss_idle.ss2;// que va???
 		tss_idle.cr3 = 0x27000;
 		tss_idle.eip = 0x16000;
-		tss_idle.eflags = 0x0002;
+		tss_idle.eflags = 0x0202;
 		tss_idle.esp = 0x27000;
 		tss_idle.ebp = 0x27000;
 		tss_idle.es = 0x50;
@@ -145,6 +144,11 @@ void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned cha
 	return;
 }
 
+
+void mapearCr3Tss(void *cr3, tss *someTss)
+{
+	(*someTss).cr3 = (int) cr3;
+}
 //la tarea tiene rpl = 3
 //el nivel con el que quiero pedir para axceder es nivel 3?
 //tss de las tareas -> tiene un nivel de privilegio

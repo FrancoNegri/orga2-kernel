@@ -11,8 +11,13 @@
 #include "screen.h"
 #include "mmu.h"
 
+#define INDICE_NO_ENCONTRADO 0
+
+
+
 typedef enum direccion_e { IZQ = 0xAAA, DER = 0x441, ADE = 0x83D, ATR = 0x732 } direccion;
 
+unsigned short game_proximo_zombie();
 
 int game_zombieEnEstadoValido(short int coordenadaZombieX, short int coordenadaZombieY);
 

@@ -29,6 +29,8 @@ void unmapearAPagina(void* direccionVirtual,void** pagina);
 
 void unmapearADirectorio(void* direccionVirtual,void** direcorio);
 
+void *mmu_inicializar_zombie(void** direccionReal, void* codigo);
+
 #endif	/* !__MMU_H__ */
 
 

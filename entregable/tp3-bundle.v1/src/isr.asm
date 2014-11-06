@@ -81,7 +81,7 @@ extern game_moverJugadorB
 extern game_cambiarClaseB_adelante
 extern game_cambiarClaseB_atras
 
-
+extern game_lanzar_zombi
 ;;
 ;; Definición de MACROS
 ;; -------------------------------------------------------------------------- ;;
@@ -215,11 +215,32 @@ imprimirErrorCode:
 ;;
 ;; Rutina de atención del RELOJ
 ;; -------------------------------------------------------------------------- ;;
+
+offset dd 0
+selector dw 0
+
 global _isr32
 _isr32:
     pushad
+
+    ;con cada tic del reloj, actualizo la pantalla
+    call game_actualizarFrame
+
     call proximo_reloj
-    call fin_intr_pic1
+    ;pido la proxima tarea
+    call sched_proximo_indice
+
+    cmp ax,[selector]
+    je  .noJump
+        mov [selector], ax
+        call fin_intr_pic1  
+        JMP far [offset]  
+        jmp .end
+.noJump:
+    call fin_intr_pic1    
+
+.end:
+    
     popad
     iret
 
@@ -355,8 +376,11 @@ _isr33:
     jz .fin
     cmp al, V
     jz .fin
+    cmp al,RShift
+    jz .RShift
+    cmp al,LShift
+    jz .LShift
     jmp .fin
-
 
 .I:
     ; moverJugadorA(1);
@@ -395,12 +419,20 @@ _isr33:
 .A:
     call game_cambiarClaseA_atras  
     jmp .fin
-
+.RShift:
+    push 0
+    call game_lanzar_zombi
+    add esp, 4
+    jmp .fin
+.LShift:
+    push 1
+    call game_lanzar_zombi
+    add esp, 4
+    jmp .fin
 .fin:
     call fin_intr_pic1
     popad
     iret
-
 
 
 ;;
@@ -429,9 +461,6 @@ _isr66:
 ;not good
 proximo_reloj:
         pushad
-
-        ;con cada tic del reloj, actualizo la pantalla
-        call game_actualizarFrame
 
         inc DWORD [isrnumero]
         mov ebx, [isrnumero]

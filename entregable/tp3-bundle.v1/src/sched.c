@@ -7,7 +7,17 @@
 
 #include "sched.h"
 
+
 unsigned short sched_proximo_indice() {
-  return 0;
+
+	unsigned int indice;
+	indice = game_proximo_zombie();
+	if(indice != INDICE_NO_ENCONTRADO)
+	{
+		return 0x70; //corro idle
+	}
+	indice = indice << 3;
+	//aca tengo que acordarme de ponerle prioridad de app, para debug, corro en priv 0
+	return indice;
 }
 

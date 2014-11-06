@@ -12,6 +12,7 @@
 #include "i386.h"
 #include "gdt.h"
 
+
 typedef struct str_tss {
     unsigned short  ptl;
     unsigned short  unused0;
@@ -53,11 +54,16 @@ typedef struct str_tss {
     unsigned short  iomap;
 } __attribute__((__packed__, aligned (8))) tss;
 
+
+tss tss_zombisA[CANT_ZOMBIS];
+tss tss_zombisB[CANT_ZOMBIS];
+
 void tss_inicializar();
 
 void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned char *base_31_24, void* tss_inicial);
 
 void cargarTSS_zombie();
 
+void mapearCr3Tss(void *cr3, tss *someTss);
 
 #endif  /* !__TSS_H__ */
