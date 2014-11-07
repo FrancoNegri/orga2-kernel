@@ -6,6 +6,7 @@
 */
 
 #include "tss.h"
+#include "mmu.h"
 
 tss tss_inicial;
 tss tss_idle;
@@ -80,7 +81,7 @@ void cargarTSS_zombie()
 	for(i = 0; i < CANT_ZOMBIS; i++)
 	{
 		
-		tss_zombisA[i].esp0 = 0x27000 ;
+		tss_zombisA[i].esp0 = (unsigned int) pedirPagina() ;
 		tss_zombisA[i].ss0 = 0x50;// que va???
 		tss_zombisA[i].esp1 = 0x27000;
 		//tss_idle.ss1; // que va???
@@ -103,7 +104,7 @@ void cargarTSS_zombie()
 	for(i = 0; i < CANT_ZOMBIS; i++)
     {
         
-        tss_zombisB[i].esp0 = 0x27000 ;
+        tss_zombisB[i].esp0 =  (unsigned int) pedirPagina() ;//0x27000;
         tss_zombisB[i].ss0 = 0x50;// que va???
         tss_zombisB[i].esp1 = 0x27000;
         //tss_idle.ss1; // que va???
@@ -147,7 +148,7 @@ void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned cha
 
 void mapearCr3Tss(void *cr3, tss *someTss)
 {
-	(*someTss).cr3 = (int) cr3;
+	(*someTss).cr3 = (unsigned int) cr3;
 }
 //la tarea tiene rpl = 3
 //el nivel con el que quiero pedir para axceder es nivel 3?

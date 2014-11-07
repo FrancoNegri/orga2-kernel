@@ -94,6 +94,8 @@ mp:
 
     ; Inicializar el manejador de memoria
    
+    call mmu_inicializar
+
     ; Inicializar el directorio de paginas
 
         push iniciando_paginacion
@@ -125,9 +127,7 @@ mp:
 
         ;xchg bx,bx
 
-        mov ax,0x68
-        LTR ax
-        ;jmp 0x70:0
+       
 
         ;1101000
 
@@ -168,15 +168,14 @@ mp:
     ; Cargar tarea inicial
     ;xchg bx,bx
 
-
-
+        mov ax,0x68
+        LTR ax
+        ;xchg bx,bx
     ; Habilitar interrupciones
-
         sti
 
     ; Saltar a la primera tarea: Idle
-
-    call mmu_inicializar
+        jmp 0x70:0
 
     ;push 0x00016000
     ;push 0x400000

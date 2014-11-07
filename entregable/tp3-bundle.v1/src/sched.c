@@ -10,13 +10,18 @@
 
 unsigned short sched_proximo_indice() {
 
-	unsigned int indice;
+	unsigned short idle = 0x70;
+	unsigned short indice = 0;
 	indice = game_proximo_zombie();
-	if(indice != INDICE_NO_ENCONTRADO)
+	if(indice == INDICE_NO_ENCONTRADO)
 	{
-		return 0x70; //corro idle
+
+		return idle; //corro idle
 	}
-	indice = indice << 3;
+	
+	//return 0x7B;
+	indice = indice *8;
+	indice += 3;
 	//aca tengo que acordarme de ponerle prioridad de app, para debug, corro en priv 0
 	return indice;
 }

@@ -202,7 +202,7 @@ text_code_len equ $ - text_code
 
 imprimirErrorCode:
     imprimir_texto_mp text_code, text_code_len, 0x07, 21, 30
-    mov edi, [esp+4]
+    mov edi, [esp-4]
     push 0x07
     push 22
     push 30
@@ -217,12 +217,14 @@ imprimirErrorCode:
 ;; -------------------------------------------------------------------------- ;;
 
 offset dd 0
-selector dw 0
+selector dw 0x70
 
 global _isr32
 _isr32:
     pushad
 
+        
+    xchg bx, bx
     ;con cada tic del reloj, actualizo la pantalla
     call game_actualizarFrame
 

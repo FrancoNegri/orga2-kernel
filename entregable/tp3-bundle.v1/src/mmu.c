@@ -36,7 +36,7 @@ void *mmu_inicializar_zombie(void** direccionReal, void* codigo)
 
 	for(i = 0; i < 9; i++)
 	{
-		void *direccionVirtual = (void*) 0x400000 + 0x1000*i;
+		void *direccionVirtual = (void*) 0x08000000 + 0x1000*i;
 		mapearAPagina01(direccionReal[i], direccionVirtual, direccionDePagina); //ponr bien las drecciones reales
 	}
 
@@ -44,12 +44,12 @@ void *mmu_inicializar_zombie(void** direccionReal, void* codigo)
 
 	void *paginaAUX= pedirPagina();
 
-	mapearAPagina01(direccionReal, (void*) 0xDC4000, paginaAUX);
+	mapearAPagina01(direccionReal[0], (void*) 0xDC4000, paginaAUX);
 
 	mapearADirectorio01((void*) 0xDC4000, paginaAUX, (void*)0x27000);
 
 	//0xDC4000
-	//copiarPagina( (void**)codigo, (void**)0xDC4000);
+	copiarPagina( (void**)codigo, (void**)0xDC4000);
 
 	//void * p = (void*) codigo;
 

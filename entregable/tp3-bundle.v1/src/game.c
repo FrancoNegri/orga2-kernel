@@ -344,7 +344,7 @@ void game_lanzar_zombi(unsigned int jugador)
 				coordenadaZombieAY[i] = coordenadaJugadorAY;
 				coordenadaZombieAX[i] = 1;
 				claseDeZombieA[i] = claseDeProximoZombieA;
-				return;
+				break;
 			}
 		}
 	}
@@ -365,14 +365,14 @@ void game_move_current_zombi(direccion dir)
 {
 }
 
-int proximoTurno = 0;
+int proximoTurno = JUGADORA;
 
 unsigned short game_proximo_zombie()
 {
-	int i;
-	if(proximoTurno == 0)
+	unsigned short i;
+	if(proximoTurno == JUGADORA)
 	{
-		proximoTurno = 1;
+		proximoTurno = JUGADORA;
 		for(i = 0; i < CANT_ZOMBIS; i++)
 		{
 			if(clockZombieA[i] != CLOCK_MUERTO)
@@ -380,14 +380,14 @@ unsigned short game_proximo_zombie()
 		}
 	}
 
-	if(proximoTurno == 1)
-	{
-		proximoTurno = 0;
-		for(i = 0; i < CANT_ZOMBIS; i++)
-		{
-			if(clockZombieB[i] != CLOCK_MUERTO)
-				return i+23;
-		}
-	}
+	// if(proximoTurno == JUGADORB)
+	// {
+	// 	proximoTurno = JUGADORA;
+	// 	for(i = 0; i < CANT_ZOMBIS; i++)
+	// 	{
+	// 		if(clockZombieB[i] != CLOCK_MUERTO)
+	// 			return i+23;
+	// 	}
+	// }
 	return INDICE_NO_ENCONTRADO;
 }
