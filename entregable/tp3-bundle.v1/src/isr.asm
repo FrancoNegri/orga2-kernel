@@ -181,9 +181,9 @@ _isr13:
 
 _isr14:
     ;algo malo pasa con la paginacion, primero la apago
-    mov eax, cr0                
-    and  eax, 0x7FFFFFFF     
-    mov cr0, eax
+    ;mov eax, cr0                
+    ;and  eax, 0x7FFFFFFF     
+    ;mov cr0, eax
 
     imprimir_texto_mp int14_capturada, int14_capturada_len, 0x07, 20, 30
     
@@ -202,12 +202,12 @@ text_code_len equ $ - text_code
 
 imprimirErrorCode:
     imprimir_texto_mp text_code, text_code_len, 0x07, 21, 30
-    mov edi, [esp-4]
+    mov edi, [esp+4]
     push 0x07
     push 22
     push 30
     push 8
-    push dword [esp+4]
+    push dword edi
     call print_hex
     jmp $
 
@@ -224,7 +224,7 @@ _isr32:
     pushad
 
         
-    xchg bx, bx
+    ;xchg bx, bx
     ;con cada tic del reloj, actualizo la pantalla
     call game_actualizarFrame
 
@@ -428,7 +428,9 @@ _isr33:
     jmp .fin
 .LShift:
     push 1
+    ;xchg bx,bx
     call game_lanzar_zombi
+    ;xchg bx,bx
     add esp, 4
     jmp .fin
 .fin:
@@ -445,8 +447,10 @@ _isr33:
 %define ADE 0x83D
 %define ATR 0x732
 
-global _isr66
-_isr66:
+
+;102 -> 0x66
+global _isr102
+_isr102:
     pushad
     call fin_intr_pic1
     popad

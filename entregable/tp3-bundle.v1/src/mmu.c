@@ -13,7 +13,7 @@ void* dirGlobal;
 
 void mmu_inicializar() 
 {
-		dirGlobal = (void*) 0x100000;
+		dirGlobal = (void*) PAGINAS_LIBRES_MMU; //defines.h
 		return;
 }
 
@@ -26,27 +26,36 @@ void *pedirPagina()
 
 void *mmu_inicializar_zombie(void** direccionReal, void* codigo)
 {
+	//no puedo usar el cr3 harcodeado, porque al ser llamada esta función de diferentes tareas,
+	//el cr3 va a ir cambiando, y no voy a estar mapeandolo bien
+
+	void * cr3Actual = (void*) rcr3();
+
 	int i;
 	void *direccionDelDirectorio = pedirPagina();
 	void *direccionDePagina= pedirPagina();
 
-	mapearADirectorio01((void*)0x0,(void*)0x28000, direccionDelDirectorio);
 
-	mapearAPagina01((void*)0x0, (void*)0x0, (void*)0x28000);
+
+	mapearADirectorio01((void*)0x0,(void*)0x28000, direccionDelDirectorio, 0x3);
+
+	//mapearAPagina01((void*)0x0, (void*)0x0, (void*)0x28000, 0x7);
 
 	for(i = 0; i < 9; i++)
 	{
 		void *direccionVirtual = (void*) 0x08000000 + 0x1000*i;
-		mapearAPagina01(direccionReal[i], direccionVirtual, direccionDePagina); //ponr bien las drecciones reales
+		mapearAPagina01(direccionReal[i], direccionVirtual, direccionDePagina, 0x7 ); //ponr bien las drecciones reales
 	}
+
+	mapearADirectorio01((void*)0x08000000,direccionDePagina, direccionDelDirectorio, 0x7);	
 
 	//copio la tarea en el mapa
 
 	void *paginaAUX= pedirPagina();
 
-	mapearAPagina01(direccionReal[0], (void*) 0xDC4000, paginaAUX);
+	mapearAPagina01(direccionReal[0], (void*) 0xDC4000, paginaAUX, 0x3);
 
-	mapearADirectorio01((void*) 0xDC4000, paginaAUX, (void*)0x27000);
+	mapearADirectorio01((void*) 0xDC4000, paginaAUX, cr3Actual, 0x3);
 
 	//0xDC4000
 	copiarPagina( (void**)codigo, (void**)0xDC4000);
@@ -58,7 +67,7 @@ void *mmu_inicializar_zombie(void** direccionReal, void* codigo)
 	//fun();
 
 	unmapearAPagina((void*)0xDC4000, paginaAUX);
-	unmapearADirectorio((void*)0xDC4000, (void*)0x27000);
+	unmapearADirectorio((void*)0xDC4000, cr3Actual);
 
 	return direccionDelDirectorio;
 }
@@ -81,7 +90,7 @@ void pedirPag(void** dir)
 	return;
 }
 
-void mapearAPagina01(void *direccionReal, void* dirVirtual,void** paginaAUX)
+void mapearAPagina01(void *direccionReal, void* dirVirtual,void** paginaAUX, unsigned char flags)
 {
 	long int aux1 = (long int) dirVirtual;
 	long int aux2 = (long int) direccionReal;
@@ -90,19 +99,19 @@ void mapearAPagina01(void *direccionReal, void* dirVirtual,void** paginaAUX)
 
 	aux2 = aux2 >> 12;
 	aux2 = aux2 << 12;
-	aux2 += 3;
+	aux2 += flags; //pagina de usuario
 	paginaAUX[aux1]= (void*) aux2;
 	return;
 }
 
-void mapearADirectorio01(void *dir,void* pt, void** pd)
+void mapearADirectorio01(void *dir,void* pt, void** pd , unsigned char flags)
 {
 	long int aux1 = (long int) dir;
 	long int aux2 = (long int) pt;
 	aux1 = aux1 >> 22;
 	aux2 = aux2 >> 12;
 	aux2 = aux2 << 12;
-	aux2 += 3;
+	aux2 += flags;
 	pd[aux1]= (void*) aux2;
 	return;
 }

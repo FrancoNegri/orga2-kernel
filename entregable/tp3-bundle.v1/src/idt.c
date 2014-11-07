@@ -69,7 +69,9 @@ void idt_inicializar() {
     //user defined
     IDT_ENTRY(32);
     IDT_ENTRY(33);
-    IDT_ENTRY(66);
+    IDT_ENTRY(102);
+
+    idt[102].attr = 0xEE00;      /* Quiero poder llamar a esta int, asi que cambio el valor a 1 11 01110 000 00000    */
 
     // Excepciones
 }

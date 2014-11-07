@@ -15,14 +15,12 @@ unsigned short sched_proximo_indice() {
 	indice = game_proximo_zombie();
 	if(indice == INDICE_NO_ENCONTRADO)
 	{
-
 		return idle; //corro idle
 	}
-	
-	//return 0x7B;
-	indice = indice *8;
-	indice += 3;
-	//aca tengo que acordarme de ponerle prioridad de app, para debug, corro en priv 0
+
+	indice = indice *8;	
+	//para saltar necesito priv 0!!!
+	//indice += 3;
 	return indice;
 }
 

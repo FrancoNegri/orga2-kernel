@@ -17,15 +17,15 @@ void copiarPagina(void **src, void **dst);
 
 void pedirPag(void** dir);
 
-void mapearAPagina01(void *direccionReal, void* dirVirtual,void** paginaAUX);
-
-void mapearADirectorio01(void *dir,void* pt, void** pd);
+void mapearAPagina01(void *direccionReal, void* dirVirtual,void** paginaAUX, unsigned char flags);
 
 void mmu_inicializar();
 
 void *pedirPagina();
 
 void unmapearAPagina(void* direccionVirtual,void** pagina);
+
+void mapearADirectorio01(void *dir,void* pt, void** pd, unsigned char flags);
 
 void unmapearADirectorio(void* direccionVirtual,void** direcorio);
 

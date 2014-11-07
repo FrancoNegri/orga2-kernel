@@ -6,6 +6,7 @@
 
 #include "game.h"
 #include "tss.h"
+#include "i386.h"
 
 void mapearDireccionesParaA(int coordenadaJugadorAY,void **direccionReal);
 
@@ -101,8 +102,11 @@ void game_actualizarFrame()
 {
     int i,j;
     short int aux;
-    short int *puntero = (short int *) 0xB8000;
+    short int *puntero = (short int *) CACHE_VIDEO;
     short int (*pixel)[80] = (short int (*)[80]) puntero;
+
+    short int *punteroABufferDeVideo = (short int *) VIDEO;
+    short int (*bufferDeVideo)[80] = (short int (*)[80]) punteroABufferDeVideo;
 
     //borro toda la pantalla
     //imprimo la parte de arriba
@@ -184,6 +188,16 @@ void game_actualizarFrame()
     pixel[47][30] = cantidadDeZombiesDisponiblesA + 0x0730;
     pixel[47][51] = cantidadDeZombiesDisponiblesB + 0x0730;
 
+
+    //ahora que tengo actualizado todo, lo paso a la pantalla
+    //(me evito el parpadeo fantasma)
+    for( i = 0 ; i < 49; i++ ) //la ultima linea la dejo libre para que los relojes hagan lo que quieran
+    {
+        for(j=0; j< 80;j++) 
+        {
+            bufferDeVideo[i][j] = pixel[i][j];
+        }
+    }
 
 
 }
@@ -334,13 +348,11 @@ void game_lanzar_zombi(unsigned int jugador)
 				//lo saco de su estado muerto
 				clockZombieA[i] = 1;
 				//calculo las direcciones para A
+                
 				mapearDireccionesParaA(coordenadaJugadorAY,direccionReal);
 				//ahora calculo las paginas realas
-				cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x1600);
-
+				cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x12000);
 				mapearCr3Tss(cr3, &tss_zombisA[i]);
-
-
 				coordenadaZombieAY[i] = coordenadaJugadorAY;
 				coordenadaZombieAX[i] = 1;
 				claseDeZombieA[i] = claseDeProximoZombieA;
@@ -372,7 +384,7 @@ unsigned short game_proximo_zombie()
 	unsigned short i;
 	if(proximoTurno == JUGADORA)
 	{
-		proximoTurno = JUGADORA;
+		proximoTurno = JUGADORB;
 		for(i = 0; i < CANT_ZOMBIS; i++)
 		{
 			if(clockZombieA[i] != CLOCK_MUERTO)
@@ -380,14 +392,14 @@ unsigned short game_proximo_zombie()
 		}
 	}
 
-	// if(proximoTurno == JUGADORB)
-	// {
-	// 	proximoTurno = JUGADORA;
-	// 	for(i = 0; i < CANT_ZOMBIS; i++)
-	// 	{
-	// 		if(clockZombieB[i] != CLOCK_MUERTO)
-	// 			return i+23;
-	// 	}
-	// }
+	 if(proximoTurno == JUGADORB)
+	 {
+	 	proximoTurno = JUGADORA;
+	 	for(i = 0; i < CANT_ZOMBIS; i++)
+	 	{
+	 		if(clockZombieB[i] != CLOCK_MUERTO)
+	 			return i+23;
+	 	}
+	 }
 	return INDICE_NO_ENCONTRADO;
 }

@@ -37,5 +37,10 @@
 /* Direcciones de memoria */
 /* -------------------------------------------------------------------------- */
 #define VIDEO                   0x000B8000 /* direccion fisica del buffer de video */
+#define PAGINAS_LIBRES_MMU		0x100000 //255 paginas disponibles
+#define CACHE_VIDEO				0x200000 // lo uso para posicionar todo adecuadamente antes de ponerlo en pantalla
+#define PAGINAS_LIBRES_TSS		0x400000 // 253 pagias disponibles
+
+
 
 #endif  /* !__DEFINES_H__ */

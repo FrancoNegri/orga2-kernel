@@ -2,6 +2,7 @@
 ; ==============================================================================
 ; TRABAJO PRACTICO 3 - System Programming - ORGANIZACION DE COMPUTADOR II - FCEN
 ; ==============================================================================
+;xchg bx,bx
 
 %include "imprimir.mac"
 
@@ -17,44 +18,37 @@ BITS 16
 start:
     
     ; Deshabilitar interrupciones
-    cli    
-    ;xchg bx,bx     ;;;;;;;;;;;;;;;;;; DEBUG LINE;;;;;;;;;;;;;;;;;
+        cli    
 
     ; Cambiar modo de video a 80 X 50
-    mov ax, 0003h
-    int 10h ; set mode 03h
-    xor bx, bx
-    mov ax, 1112h
-    int 10h ; load 8x8 font
+        mov ax, 0003h
+        int 10h ; set mode 03h
+        xor bx, bx
+        mov ax, 1112h
+        int 10h ; load 8x8 font
 
     ; Imprimir mensaje de bienvenida
-    imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
+        imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
 
     ; Habilitar A20
     
-    call habilitar_A20
+        call habilitar_A20
 
     ; Cargar la GDT
  
-    lgdt [GDT_DESC]
-
-
+        lgdt [GDT_DESC]
 
     ; Setear el bit PE del registro CR0
 
-
-    mov eax, CR0
-    or eax, 1
-    
-    mov CR0, eax
-
-    ;imprimir_texto_mr iniciando_GDT_msg, iniciando_GDT_len, 0x07,0,0
+        mov eax, CR0
+        or eax, 1
+        mov CR0, eax
 
     ; Saltar a modo protegido
 
-    jmp 0x40:mp
+        jmp 0x40:mp
+        ;01000000
 
-    ;01000000
     ; Establecer selectores de segmentos
 BITS 32
 mp: 
@@ -82,7 +76,6 @@ mp:
         call print
         add esp, 4
 
-
     ; Inicializar pantalla
 
 
@@ -94,7 +87,7 @@ mp:
 
     ; Inicializar el manejador de memoria
    
-    call mmu_inicializar
+        call mmu_inicializar
 
     ; Inicializar el directorio de paginas
 
@@ -105,10 +98,12 @@ mp:
         call page_init
 
     ; Cargar directorio de paginas
+
         mov eax, 0x27000         
         mov cr3, eax
     
     ; Habilitar paginacion
+
         mov eax, cr0                
         or  eax, 0x80000000     
         mov cr0, eax
@@ -123,17 +118,13 @@ mp:
 
         call cargarTSS_zombie
 
-        ;test tss
-
-        ;xchg bx,bx
-
-       
-
-        ;1101000
-
     ; Inicializar tss de la tarea Idle
 
+        ;se hace en tss_inicializar
+
     ; Inicializar el scheduler
+
+        ;el scheduler no necesita inicializar, le pregunta a game.c que hacer
 
     ; Inicializar la IDT
     
@@ -151,38 +142,23 @@ mp:
 
         lidt [IDT_DESC]
 
-
-    ;prueba de int 0
-    ;xor esi, esi
-    ;idiv esi
-
-    ;prueba de int 13
-    ;mov ecx, 0xffffffff
-    ;mov [gs:ecx], di
-
     ; Configurar controlador de interrupciones
 
         call resetear_pic
         call habilitar_pic
 
     ; Cargar tarea inicial
-    ;xchg bx,bx
 
         mov ax,0x68
         LTR ax
-        ;xchg bx,bx
+       
     ; Habilitar interrupciones
+
         sti
 
     ; Saltar a la primera tarea: Idle
+
         jmp 0x70:0
-
-    ;push 0x00016000
-    ;push 0x400000
-
-    ;call mmu_inicializar_zombie
-
-    ;add esp, 8
 
     ; Ciclar infinitamente (por si algo sale mal...)
 
