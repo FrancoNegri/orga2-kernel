@@ -26,7 +26,7 @@ void _isr14();
 void _isr17();
 void _isr32();
 void _isr33();
+void _isr99(); // definida por kernel, paginas de mmu/tss agotadas
 void _isr102();
-
 
 #endif  /* !__ISR_H__ */

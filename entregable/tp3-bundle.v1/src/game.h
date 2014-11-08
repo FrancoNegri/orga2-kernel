@@ -21,19 +21,13 @@ unsigned short game_proximo_zombie();
 
 int game_zombieEnEstadoValido(short int coordenadaZombieX, short int coordenadaZombieY);
 
-void game_moverJugadorA(int cantidadPosiciones);
-
-void game_moverJugadorB(int cantidadPosiciones);
-
-int game_obtenerCoordenadaYjugadorA();
-
-int game_obtenerCoordenadaYjugadorB();
+void game_moverJugador(int numeroDeJugador, int cantidadPosiciones);
 
 void game_actualizarFrame();
 
-void game_cambiarClaseA_atras();
+void game_cambiarClase_atras(int jugador);
 
-void game_cambiarClaseA_adelante();
+void game_cambiarClase_adelante(int jugador);
 
 void game_lanzar_zombi(unsigned int jugador);
 

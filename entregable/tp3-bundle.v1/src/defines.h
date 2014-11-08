@@ -37,10 +37,19 @@
 /* Direcciones de memoria */
 /* -------------------------------------------------------------------------- */
 #define VIDEO                   0x000B8000 /* direccion fisica del buffer de video */
-#define PAGINAS_LIBRES_MMU		0x100000 //255 paginas disponibles
-#define CACHE_VIDEO				0x200000 // lo uso para posicionar todo adecuadamente antes de ponerlo en pantalla
-#define PAGINAS_LIBRES_TSS		0x400000 // 253 pagias disponibles
+#define PAGINAS_LIBRES_MMU		0x100000 //500 paginas disponibles (hacia arriba)
+#define CACHE_VIDEO				0x300000 // lo uso para posicionar todo adecuadamente antes de ponerlo en pantalla
+#define PAGINAS_LIBRES_TSS		0x400000 // 254 paginas disponibles (hacia abajo)
 
+#define LIMITE_PAGINAS_LIBRES_MMU 256*2
+#define LIMITE_PAGINAS_LIBRES_TSS 255 //la pagina 0x300000 la uso para video
 
+#define COMIENZO_DEL_MAPA 0x400000
+#define OFFSET_FILA 0x1000*SIZE_W 
+#define TAMANIO_DEL_MAPA OFFSET_FILA*SIZE_H
+#define FIN_DEL_MAPA COMIENZO_DEL_MAPA+TAMANIO_DEL_MAPA
+
+#define OFFSET_ZOMBIS_A 15
+#define OFFSET_ZOMBIS_B 15 + CANT_ZOMBIS
 
 #endif  /* !__DEFINES_H__ */

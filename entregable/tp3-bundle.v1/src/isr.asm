@@ -70,17 +70,10 @@ extern sched_proximo_indice
 
 ;screen.c
 extern print_hex
-
 extern game_actualizarFrame
-
-extern game_cambiarClaseA_adelante
-extern game_cambiarClaseA_atras
-extern game_moverJugadorA
-
-extern game_moverJugadorB
-extern game_cambiarClaseB_adelante
-extern game_cambiarClaseB_atras
-
+extern game_cambiarClase_adelante
+extern game_cambiarClase_atras
+extern game_moverJugador
 extern game_lanzar_zombi
 ;;
 ;; Definición de MACROS
@@ -387,39 +380,51 @@ _isr33:
 .I:
     ; moverJugadorA(1);
     push -1
-    call game_moverJugadorB
-    add esp, 4
+    push 0
+    call game_moverJugador
+    add esp, 8
     jmp .fin
 .K:
     push 1
-    call game_moverJugadorB
-    add esp, 4
+    push 0
+    call game_moverJugador
+    add esp, 8
     jmp .fin
 .L:
-    call game_cambiarClaseB_adelante
+    push 0
+    call game_cambiarClase_adelante
+    add esp,4
     jmp .fin
 
 .J:
-    call game_cambiarClaseB_atras  
+    push 0
+    call game_cambiarClase_atras  
+    add esp,4
     jmp .fin
 
 .W:
     ; moverJugadorA(1);
     push -1
-    call game_moverJugadorA
-    add esp, 4
+    push 1
+    call game_moverJugador
+    add esp, 8
     jmp .fin
 .S:
     push 1
-    call game_moverJugadorA
-    add esp, 4
+    push 1
+    call game_moverJugador
+    add esp, 8
     jmp .fin
 .D:
-    call game_cambiarClaseA_adelante
+    push 1
+    call game_cambiarClase_adelante
+    add esp,4
     jmp .fin
 
 .A:
-    call game_cambiarClaseA_atras  
+    push 1
+    call game_cambiarClase_atras  
+    add esp, 4
     jmp .fin
 .RShift:
     push 0
@@ -448,16 +453,25 @@ _isr33:
 %define ATR 0x732
 
 
+extern game_move_current_zombi
 ;102 -> 0x66
 global _isr102
 _isr102:
     pushad
-    call fin_intr_pic1
+    ;llamo a game_move_current_zombi(direccion dir)
+    push eax
+    call game_move_current_zombi
+    add esp, 4
     popad
-    mov eax, 0x42
     iret
 
-
+int99_capturada db "Paginas para manejo de mmu/tss agotadas"
+int99_capturada_len equ $ - int99_capturada
+global _isr99:
+_isr99:
+    pushad
+    imprimir_texto_mp int14_capturada, int14_capturada_len, 0x07, 20, 30
+    jmp $
 
 
 

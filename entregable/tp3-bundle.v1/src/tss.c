@@ -15,6 +15,7 @@ tss tss_inicial;
 tss tss_idle;
 
 unsigned int proximaPaginaVacia;
+unsigned int contadorPaginasVacias;
 
 void tss_inicializar() {
 		tss_idle.esp0 = 0x27000 ;
@@ -57,6 +58,7 @@ void tss_inicializar() {
 		//por hay esto no es necesario porque solo se va a usar para guardar el estado 
 		//de la cpu al saltar a la primera tarea
 		proximaPaginaVacia = PAGINAS_LIBRES_TSS;
+		contadorPaginasVacias = 0;
 
 
 	    editarGDT( &gdt[GDT_IDX_TSS_0].base_0_15,&gdt[GDT_IDX_TSS_0].base_23_16,&gdt[GDT_IDX_TSS_0].base_31_24, &tss_inicial);
@@ -151,6 +153,21 @@ void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned cha
 	return;
 }
 
+unsigned int tss_current_tss()
+{
+	int i;
+	for(i = 15; i< GDT_COUNT; i++)
+	{
+		//1011 -> la tarea esta busy
+		if(gdt[i].type == 11)
+		{
+			return i;
+		}
+	}
+	return 0;
+}
+
+
 
 void mapearCr3Tss(void *cr3, tss *someTss)
 {
@@ -159,8 +176,24 @@ void mapearCr3Tss(void *cr3, tss *someTss)
 
 unsigned int pedirPaginaVacia()
 {
-	proximaPaginaVacia -= 0x1000;
-	return proximaPaginaVacia;
+	if(contadorPaginasVacias < LIMITE_PAGINAS_LIBRES_TSS)
+	{
+		contadorPaginasVacias++;
+		proximaPaginaVacia -= 0x1000;
+		return proximaPaginaVacia;		
+	}
+	else
+	{
+		int d = 2;
+		__asm __volatile(
+        "mov %0, %%eax \n"
+        "int $99     \n"
+        : /* no output*/
+        : "m" (d)
+        : "eax"
+    	);
+	}
+	return 0x0;
 }
 //la tarea tiene rpl = 3
 //el nivel con el que quiero pedir para axceder es nivel 3?

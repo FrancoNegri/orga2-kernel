@@ -66,4 +66,6 @@ void cargarTSS_zombie();
 
 void mapearCr3Tss(void *cr3, tss *someTss);
 
+unsigned int tss_current_tss();
+
 #endif  /* !__TSS_H__ */

@@ -8,7 +8,9 @@
 #include "tss.h"
 #include "i386.h"
 
-void mapearDireccionesParaA(int coordenadaJugadorAY,void **direccionReal);
+void mapearDirecciones(int jugador,int coordenadaJugadorAY,void **direccionReal);
+
+#define CANTIDAD_DE_JUGADORES 2
 
 //define colores
 #define ROJO 0x3000
@@ -17,78 +19,62 @@ void mapearDireccionesParaA(int coordenadaJugadorAY,void **direccionReal);
 #define NEGRO 0x0000
 #define GRIS 0x0700
 
-
 //define clases de zombies
 #define CLERIGO 0x0743
 #define MAGO 0x074D
 #define GUERRERO 0x0747
 
-
+//define partes del juego
 #define CLOCK_MUERTO 0
-
 #define LIMITE_DEL_TABLERO 44
 
 #define FILA_PARA_NUMERO_DE_ZOMBIE 45
 #define FILA_PARA_CLOCKS 47
 
-int coordenadaJugadorAY;
-int coordenadaJugadorBY;
+#define COORDENADA_INICIAL_X_A 2
+#define COORDENADA_INICIAL_X_B 77
 
-short int claseDeProximoZombieA;
-short int claseDeProximoZombieB;
+#define JUGADORA 1
+#define JUGADORB 0
 
-int coordenadaZombieAX[CANT_ZOMBIS];
-int coordenadaZombieAY[CANT_ZOMBIS];
+int coordenadaJugadorY[CANTIDAD_DE_JUGADORES];
 
+short int claseDeProximoZombie[CANTIDAD_DE_JUGADORES];
 
-int coordenadaZombieBX[CANT_ZOMBIS];
-int coordenadaZombieBY[CANT_ZOMBIS];
+int coordenadaZombieX[CANTIDAD_DE_JUGADORES][CANT_ZOMBIS];
+int coordenadaZombieY[CANTIDAD_DE_JUGADORES][CANT_ZOMBIS];
 
-short int claseDeZombieA[CANT_ZOMBIS];
-short int claseDeZombieB[CANT_ZOMBIS];
+short int claseDeZombie[CANTIDAD_DE_JUGADORES][CANT_ZOMBIS];
 
-int clockZombieA[CANT_ZOMBIS];
-int clockZombieB[CANT_ZOMBIS];
+int clockZombie[CANTIDAD_DE_JUGADORES][CANT_ZOMBIS];
 
 char clockZ[] = {'x', '/', '|', '\\', '-', '/', '|', '\\', '-'};
 
-int puntajeA;
-int puntajeB;
+int puntaje[CANTIDAD_DE_JUGADORES];
 
-int cantidadDeZombiesDisponiblesA;
-int cantidadDeZombiesDisponiblesB;
+int cantidadDeZombiesDisponibles[CANTIDAD_DE_JUGADORES];
 
 //graficos del juego
 
 void game_inicializarMapa()
 {
-    int i;
-    coordenadaJugadorAY = 25;
-    coordenadaJugadorBY = 25;    
-
-    claseDeProximoZombieA = GUERRERO;
-    claseDeProximoZombieB = GUERRERO;
-
-    puntajeA=0;
-    puntajeB=0;
-
-    cantidadDeZombiesDisponiblesA = CANT_ZOMBIS;
-	cantidadDeZombiesDisponiblesB = CANT_ZOMBIS;
-
-    //inicializo los zombies fuera del mapa y en estados invalidos
-    for(i = 0; i < CANT_ZOMBIS; i++)
+    int i,j;
+    for(j = 0; j < CANTIDAD_DE_JUGADORES; j++)
     {
-        coordenadaZombieAX[i] = -1; 
-        coordenadaZombieAY[i] = -1;
-        claseDeZombieA[i] = 0;
-        clockZombieA[i] = CLOCK_MUERTO;
-
-
-        coordenadaZombieBX[i] = -1;
-        coordenadaZombieBY[i] = -1;
-        claseDeZombieB[i] = 0;
-        clockZombieB[i] = CLOCK_MUERTO;
+        coordenadaJugadorY[j] = 25;
+        claseDeProximoZombie[j] = GUERRERO;
+        puntaje[j]=0;
+        cantidadDeZombiesDisponibles[j] = CANT_ZOMBIS;       
+        //inicializo los zombies fuera del mapa y en estados invalidos
+        for(i = 0; i < CANT_ZOMBIS; i++)
+        {
+            coordenadaZombieX[j][i] = -1; 
+            coordenadaZombieY[j][i] = -1;
+            claseDeZombie[j][i] = 0;
+            clockZombie[j][i] = CLOCK_MUERTO;
+        }
     }
+
     game_actualizarFrame();
     return;
 }
@@ -130,38 +116,34 @@ void game_actualizarFrame()
     }
 
 
-    pixel[coordenadaJugadorAY][0] = claseDeProximoZombieA;
-    pixel[coordenadaJugadorBY][79] = claseDeProximoZombieB;
+    pixel[coordenadaJugadorY[JUGADORA]][0] = claseDeProximoZombie[JUGADORA];
+    pixel[coordenadaJugadorY[JUGADORB]][79] = claseDeProximoZombie[JUGADORB];
 
 
     //para cada zombie actualizo su posicion
     for(i = 0; i < CANT_ZOMBIS; i++)
     {
-        if(game_zombieEnEstadoValido(coordenadaZombieAX[i],coordenadaZombieAY[i]))
-        {
-            pixel[coordenadaZombieAY[i]][coordenadaZombieAX[i]] = claseDeZombieA[i];
-        }
-
-        if(game_zombieEnEstadoValido(coordenadaZombieBX[i],coordenadaZombieBY[i]))
-        {
-            pixel[coordenadaZombieBY[i]][coordenadaZombieBX[i]] = claseDeZombieB[i];
-        }
+        for(j = 0; j < CANTIDAD_DE_JUGADORES; j++)
+            if(game_zombieEnEstadoValido(coordenadaZombieX[j][i],coordenadaZombieY[j][i]))
+            {
+                pixel[coordenadaZombieY[j][i]][coordenadaZombieX[j][i]] = claseDeZombie[j][i];
+            }
     }
 
     for(i = 0; i < CANT_ZOMBIS ; i++)
     {
     	//actualizo los relojes para los zombies A
-	    aux = (short int) clockZ[clockZombieA[i]];
+	    aux = (short int) clockZ[clockZombie[JUGADORA][i]];
 	    aux += 0x0700;
 	    pixel[FILA_PARA_NUMERO_DE_ZOMBIE][i*3 + 5] = i + 0x0730; //esta constante es para que me quede justo en el ascci apropiado, 0x07 es el color y 0x30 para el caracter numero
 	    pixel[FILA_PARA_CLOCKS][i*3 + 5] = aux; 
 
 
 	    //actializo los relojes para zombies B
-	    aux = (short int) clockZ[clockZombieB[i]];
+	    aux = (short int) clockZ[clockZombie[JUGADORB][i]];
 	    aux += 0x0700;
 	    pixel[FILA_PARA_NUMERO_DE_ZOMBIE][i*3 + 55] = i + 0x0730; 
-	    pixel[FILA_PARA_CLOCKS][i*3 + 55] = aux;	
+	    pixel[FILA_PARA_CLOCKS][i*3 + 55] = aux;
     }
 
 
@@ -182,12 +164,11 @@ void game_actualizarFrame()
     	}
     }
 
-    pixel[47][35] = puntajeA + 0x0730;
-    pixel[47][45] = puntajeB + 0x0730;
+    pixel[47][35] = puntaje[JUGADORA] + 0x0730;
+    pixel[47][45] = puntaje[JUGADORB] + 0x0730;
 
-    pixel[47][30] = cantidadDeZombiesDisponiblesA + 0x0730;
-    pixel[47][51] = cantidadDeZombiesDisponiblesB + 0x0730;
-
+    pixel[47][30] = cantidadDeZombiesDisponibles[JUGADORA] + 0x0730;
+    pixel[47][51] = cantidadDeZombiesDisponibles[JUGADORB] + 0x0730;
 
     //ahora que tengo actualizado todo, lo paso a la pantalla
     //(me evito el parpadeo fantasma)
@@ -214,192 +195,180 @@ int game_zombieEnEstadoValido(short int coordenadaZombieX, short int coordenadaZ
     return 0;
 }
 
-void game_moverJugadorA(int cantidadPosiciones)
+void game_moverJugador(int numeroDeJugador,int cantidadPosiciones)
 {
-    coordenadaJugadorAY += cantidadPosiciones;
+    coordenadaJugadorY[numeroDeJugador] += cantidadPosiciones;
     //para que no se salga del area de juego
-     if(coordenadaJugadorAY < 0)
-        coordenadaJugadorAY = LIMITE_DEL_TABLERO -1;
-    if(coordenadaJugadorAY > LIMITE_DEL_TABLERO - 1)
-        coordenadaJugadorAY = 0;
+    if(coordenadaJugadorY[numeroDeJugador] < 0)
+        coordenadaJugadorY[numeroDeJugador] = LIMITE_DEL_TABLERO -1;
+    if(coordenadaJugadorY[numeroDeJugador] > LIMITE_DEL_TABLERO - 1)
+        coordenadaJugadorY[numeroDeJugador] = 0;
 }
 
-void game_moverJugadorB(int cantidadPosiciones)
+void game_cambiarClase_atras(int numeroDeJugador)
 {
-    coordenadaJugadorBY += cantidadPosiciones;
-    //esto es para que no se me salga del area de juego
-    if(coordenadaJugadorBY < 0)
-        coordenadaJugadorBY = LIMITE_DEL_TABLERO -1;
-    if(coordenadaJugadorBY > LIMITE_DEL_TABLERO - 1)
-        coordenadaJugadorBY = 0;
-
-}
-
-int game_obtenerCoordenadaYjugadorA()
-{
-    return coordenadaJugadorAY;
-}
-
-int game_obtenerCoordenadaYjugadorB()
-{
-    return coordenadaJugadorBY;
-}
-
-
-//obvio que estas funciones al tener comportamiento similar se pueden extraer en una función unica.
-//supongamos que tuve un aneurisma y me olvidé todo lo que se del arte de programar.
-void game_cambiarClaseA_atras()
-{
-    switch(claseDeProximoZombieA)
+    switch(claseDeProximoZombie[numeroDeJugador])
     {
         case GUERRERO:
-            claseDeProximoZombieA = MAGO;
+            claseDeProximoZombie[numeroDeJugador] = MAGO;
             break;
         case MAGO:
-            claseDeProximoZombieA = CLERIGO;
+            claseDeProximoZombie[numeroDeJugador] = CLERIGO;
             break;
         case CLERIGO:
-            claseDeProximoZombieA = GUERRERO;
+            claseDeProximoZombie[numeroDeJugador] = GUERRERO;
             break;
     }
 }
 
-void game_cambiarClaseA_adelante()
+void game_cambiarClase_adelante(int numeroDeJugador)
 {
-    switch(claseDeProximoZombieA)
+    switch(claseDeProximoZombie[numeroDeJugador])
     {
         case GUERRERO:
-            claseDeProximoZombieA = CLERIGO;
+            claseDeProximoZombie[numeroDeJugador] = CLERIGO;
             break;
         case MAGO:
-            claseDeProximoZombieA = GUERRERO;
+            claseDeProximoZombie[numeroDeJugador] = GUERRERO;
             break;
         case CLERIGO:
-            claseDeProximoZombieA = MAGO;
+            claseDeProximoZombie[numeroDeJugador] = MAGO;
             break;
     }
 }
 
-void game_cambiarClaseB_atras()
+void game_actualizarClockZombie(int numeroDeJugador,int numeroDeZombie)
 {
-    switch(claseDeProximoZombieB)
-    {
-        case GUERRERO:
-            claseDeProximoZombieB = MAGO;
-            break;
-        case MAGO:
-            claseDeProximoZombieB = CLERIGO;
-            break;
-        case CLERIGO:
-            claseDeProximoZombieB = GUERRERO;
-            break;
-    }
+	if(clockZombie[numeroDeJugador][numeroDeZombie] != CLOCK_MUERTO)
+		clockZombie[numeroDeJugador][numeroDeZombie]++;
+	if(clockZombie[numeroDeJugador][numeroDeZombie] > 8)
+		clockZombie[numeroDeJugador][numeroDeZombie] = 1;
 }
-
-void game_cambiarClaseB_adelante()
-{
-    switch(claseDeProximoZombieB)
-    {
-        case GUERRERO:
-            claseDeProximoZombieB = CLERIGO;
-            break;
-        case MAGO:
-            claseDeProximoZombieB = GUERRERO;
-            break;
-        case CLERIGO:
-            claseDeProximoZombieB = MAGO;
-            break;
-    }
-}
-
-void game_actualizarClockZombieA(int numeroDeZombie)
-{
-	if(clockZombieA[numeroDeZombie] != CLOCK_MUERTO)
-		clockZombieA[numeroDeZombie]++;
-	if(clockZombieA[numeroDeZombie] > 8)
-		clockZombieA[numeroDeZombie] = 1;
-}
-
-void game_actualizarClockZombieB(int numeroDeZombie)
-{
-	if(clockZombieB[numeroDeZombie] != CLOCK_MUERTO)
-		clockZombieB[numeroDeZombie]++;
-	if(clockZombieB[numeroDeZombie] > 8)
-		clockZombieB[numeroDeZombie] = 0;
-}
-
-#define JUGADORA 1
-#define JUGADORB 0
 
 void *direccionReal[9];
 
 void game_lanzar_zombi(unsigned int jugador) 
 {
-	int i;
-	void *cr3;
-	if(jugador == JUGADORA)
-	{
-		for(i=0; i < CANT_ZOMBIS; i++)
-		{
-			//esto quiere decir que el slot esta vacio, lo uso para el zombie nuevo
-			if(clockZombieA[i] == CLOCK_MUERTO)
-			{
-				cantidadDeZombiesDisponiblesA--;
-				//lo saco de su estado muerto
-				clockZombieA[i] = 1;
-				//calculo las direcciones para A
-                
-				mapearDireccionesParaA(coordenadaJugadorAY,direccionReal);
-				//ahora calculo las paginas realas
-				cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x12000);
-				mapearCr3Tss(cr3, &tss_zombisA[i]);
-				coordenadaZombieAY[i] = coordenadaJugadorAY;
-				coordenadaZombieAX[i] = 1;
-				claseDeZombieA[i] = claseDeProximoZombieA;
-				break;
-			}
-		}
-	}
+    int i;
+    void *cr3;
+    for(i = 0; i < CANT_ZOMBIS; i++)
+    {
+    //esto quiere decir que el slot esta vacio, lo uso para el zombie nuevo
+        if(clockZombie[jugador][i] == CLOCK_MUERTO)
+        {
+            cantidadDeZombiesDisponibles[jugador]--;
+                //lo saco de su estado muerto
+            clockZombie[jugador][i] = 1;
+                //calculo las direcciones para A
+                //ahora calculo las paginas realas
+            mapearDirecciones(jugador,coordenadaJugadorY[jugador],direccionReal);
+
+
+
+            //acá tengo que cambiar el codigo dependiendo de si es mago, clerigo, etc
+
+
+
+            cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x12000);
+            if(jugador == JUGADORA)
+            {
+                mapearCr3Tss(cr3, &tss_zombisA[i]);
+            }
+            if(jugador == JUGADORB)
+            {
+                mapearCr3Tss(cr3, &tss_zombisB[i]);
+            }
+            coordenadaZombieY[jugador][i] = coordenadaJugadorY[jugador];
+            if(jugador == JUGADORA)
+            {
+                coordenadaZombieX[jugador][i] = COORDENADA_INICIAL_X_A;
+            }
+            if(jugador == JUGADORB)
+            {
+                coordenadaZombieX[jugador][i] = COORDENADA_INICIAL_X_B;
+            }
+            claseDeZombie[jugador][i] = claseDeProximoZombie[jugador];
+            return;
+        }
+    }
 }
 
 
 
-void mapearDireccionesParaA(int coordenadaJugadorAY,void **direccionReal)
+int coordenadas[2][9] = {
+                        {0x400000 + 0x1000*78*2 - 0x2000 , 0x400000 + 0x1000*78*2 - 0x3000, 0x400000 + 0x1000*78 - 0x3000, 0x400000 + 0x1000*78*3 - 0x3000,0x400000 + 0x1000*78 - 0x2000,0x400000 + 0x1000*78*3-0x2000,0x400000 + 0x1000*78*2-0x1000,0x400000 + 0x1000*78*3-0x1000,0x400000 + 0x1000*78 - 0x1000}, 
+                        { 0x401000 + 0x1000*78 , 0x402000 + 0x1000*78 , 0x402000 + 0x1000*78*2 , 0x402000, 0x401000 + 0x1000*78*2 , 0x401000, 0x400000 + 0x1000*78, 0x400000 , 0x400000 + 0x1000*78*2}};
+
+
+void mapearDirecciones(int jugador,int coordenadaJugadorAY,void **direccionReal)
 {
 	int i;
 	for(i = 0; i< 9; i++)
 	{
-		direccionReal[i] = (void*) 0x400000;
+		direccionReal[i] = (void*) coordenadas[jugador][i]+OFFSET_FILA*(coordenadaJugadorAY-1);
 	}
 }
 
 void game_move_current_zombi(direccion dir) 
 {
+    unsigned int indice_tss = tss_current_tss();
+    //DEPENDE DEL PUTO ZOMBIE
+    //uso mmu_bla_bla para mapear
+    switch(dir)
+    {
+        case IZQ:
+
+            break;
+        case DER:
+
+            break;
+        case ADE:
+            
+            break;
+        case ATR:
+
+            break;
+    }
+    indice_tss++;
 }
 
-int proximoTurno = JUGADORA;
+int jugadorAlQueLeToca = JUGADORA;
+int anteriorZombie[] = {0,0};
 
 unsigned short game_proximo_zombie()
 {
 	unsigned short i;
-	if(proximoTurno == JUGADORA)
-	{
-		proximoTurno = JUGADORB;
-		for(i = 0; i < CANT_ZOMBIS; i++)
-		{
-			if(clockZombieA[i] != CLOCK_MUERTO)
-				return i+15;
-		}
-	}
 
-	 if(proximoTurno == JUGADORB)
-	 {
-	 	proximoTurno = JUGADORA;
-	 	for(i = 0; i < CANT_ZOMBIS; i++)
-	 	{
-	 		if(clockZombieB[i] != CLOCK_MUERTO)
-	 			return i+23;
-	 	}
-	 }
+    if(jugadorAlQueLeToca == JUGADORA)
+    {
+        jugadorAlQueLeToca = JUGADORB;
+    }
+    else
+    {
+        jugadorAlQueLeToca = JUGADORA;
+    }
+
+    i = anteriorZombie[jugadorAlQueLeToca] +1;
+    while(1)
+    {
+
+        if(i == CANT_ZOMBIS)
+            i = 0;
+		if(clockZombie[jugadorAlQueLeToca][i] != CLOCK_MUERTO)
+        {
+            anteriorZombie[jugadorAlQueLeToca] = i;
+            game_actualizarClockZombie(jugadorAlQueLeToca, i);
+            if(jugadorAlQueLeToca == JUGADORA)
+			     return OFFSET_ZOMBIS_A +i;
+            if(jugadorAlQueLeToca == JUGADORB)
+                 return OFFSET_ZOMBIS_B + i;
+        }
+
+        if(i == anteriorZombie[jugadorAlQueLeToca] && clockZombie[jugadorAlQueLeToca][i] == CLOCK_MUERTO)
+        {
+            return INDICE_NO_ENCONTRADO;
+        }
+        i++;
+    }
 	return INDICE_NO_ENCONTRADO;
 }

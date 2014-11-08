@@ -10,18 +10,36 @@
 //typedef void (*func_ptr)(void);
 
 void* dirGlobal;
+int contadorDePaginas;
 
 void mmu_inicializar() 
 {
 		dirGlobal = (void*) PAGINAS_LIBRES_MMU; //defines.h
+		contadorDePaginas = 0;
 		return;
 }
 
 void *pedirPagina()
 {
 	dirGlobal = dirGlobal +0x01000;
-	pedirPag((void**)dirGlobal);
-	return dirGlobal;
+	if( contadorDePaginas < LIMITE_PAGINAS_LIBRES_MMU)
+	{
+		contadorDePaginas++;
+		pedirPag((void**)dirGlobal);
+		return dirGlobal;		
+	}
+	else
+	{
+		int d = 1;
+		__asm __volatile(
+        "mov %0, %%eax \n"
+        "int $99     \n"
+        : /* no output*/
+        : "m" (d)
+        : "eax"
+    );
+	}
+	return 0x0;
 }
 
 void *mmu_inicializar_zombie(void** direccionReal, void* codigo)
