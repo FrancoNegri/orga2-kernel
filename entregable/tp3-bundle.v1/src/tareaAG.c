@@ -13,7 +13,8 @@ void task() {
     /* Tarea */
     int i;
     for(i=0;i<100;i++) {
-      syscall_mover(ADE); 
+      //breakpoint();
+      syscall_mover(ADE);
       syscall_mover(DER); 
       syscall_mover(ADE); 
       syscall_mover(ADE); 

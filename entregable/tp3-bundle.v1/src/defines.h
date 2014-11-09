@@ -39,7 +39,9 @@
 #define VIDEO                   0x000B8000 /* direccion fisica del buffer de video */
 #define PAGINAS_LIBRES_MMU		0x100000 //500 paginas disponibles (hacia arriba)
 #define CACHE_VIDEO				0x300000 // lo uso para posicionar todo adecuadamente antes de ponerlo en pantalla
+#define CACHE_TAREA				0x301000
 #define PAGINAS_LIBRES_TSS		0x400000 // 254 paginas disponibles (hacia abajo)
+
 
 #define LIMITE_PAGINAS_LIBRES_MMU 256*2
 #define LIMITE_PAGINAS_LIBRES_TSS 255 //la pagina 0x300000 la uso para video
@@ -50,6 +52,6 @@
 #define FIN_DEL_MAPA COMIENZO_DEL_MAPA+TAMANIO_DEL_MAPA
 
 #define OFFSET_ZOMBIS_A 15
-#define OFFSET_ZOMBIS_B 15 + CANT_ZOMBIS
+#define OFFSET_ZOMBIS_B 15+CANT_ZOMBIS
 
 #endif  /* !__DEFINES_H__ */

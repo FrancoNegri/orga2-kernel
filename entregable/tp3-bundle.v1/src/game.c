@@ -8,7 +8,7 @@
 #include "tss.h"
 #include "i386.h"
 
-void mapearDirecciones(int jugador,int coordenadaJugadorAY,void **direccionReal);
+void mapearZombie(int jugador, int coordenadaX, int coordenadaY, void **direcciones);
 
 #define CANTIDAD_DE_JUGADORES 2
 
@@ -187,7 +187,7 @@ int game_zombieEnEstadoValido(short int coordenadaZombieX, short int coordenadaZ
 {
     if(coordenadaZombieX < 79 && coordenadaZombieX > 0)
     {
-        if(coordenadaZombieY < LIMITE_DEL_TABLERO && coordenadaZombieY > 0)
+        if(coordenadaZombieY <= LIMITE_DEL_TABLERO && coordenadaZombieY >= 0)
         {
             return 1;
         }
@@ -245,10 +245,10 @@ void game_actualizarClockZombie(int numeroDeJugador,int numeroDeZombie)
 		clockZombie[numeroDeJugador][numeroDeZombie] = 1;
 }
 
-void *direccionReal[9];
 
 void game_lanzar_zombi(unsigned int jugador) 
 {
+    void *direccionReal[9];
     int i;
     void *cr3;
     for(i = 0; i < CANT_ZOMBIS; i++)
@@ -259,35 +259,56 @@ void game_lanzar_zombi(unsigned int jugador)
             cantidadDeZombiesDisponibles[jugador]--;
                 //lo saco de su estado muerto
             clockZombie[jugador][i] = 1;
-                //calculo las direcciones para A
-                //ahora calculo las paginas realas
-            mapearDirecciones(jugador,coordenadaJugadorY[jugador],direccionReal);
 
-
-
-            //acá tengo que cambiar el codigo dependiendo de si es mago, clerigo, etc
-
-
-
-            cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x12000);
-            if(jugador == JUGADORA)
-            {
-                mapearCr3Tss(cr3, &tss_zombisA[i]);
-            }
-            if(jugador == JUGADORB)
-            {
-                mapearCr3Tss(cr3, &tss_zombisB[i]);
-            }
             coordenadaZombieY[jugador][i] = coordenadaJugadorY[jugador];
+            
             if(jugador == JUGADORA)
-            {
-                coordenadaZombieX[jugador][i] = COORDENADA_INICIAL_X_A;
-            }
+                {
+                    coordenadaZombieX[jugador][i] = COORDENADA_INICIAL_X_A;
+                }
             if(jugador == JUGADORB)
-            {
-                coordenadaZombieX[jugador][i] = COORDENADA_INICIAL_X_B;
-            }
+                {
+                    coordenadaZombieX[jugador][i] = COORDENADA_INICIAL_X_B;
+                }
             claseDeZombie[jugador][i] = claseDeProximoZombie[jugador];
+
+            //calculo las direcciones para A
+            //ahora calculo las paginas realas
+            mapearZombie(jugador, coordenadaZombieX[jugador][i], coordenadaZombieY[jugador][i], direccionReal);
+
+            if(jugador == JUGADORA)
+                {
+                    switch(claseDeZombie[jugador][i])
+                    {
+                        case GUERRERO:
+                            cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x10000);
+                            break;
+                        case MAGO:
+                            cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x11000);
+                            break;
+                        case CLERIGO:
+                            cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x12000);
+                            break;
+
+                    }
+                    mapearCr3Tss(cr3, &tss_zombisA[i]);
+                }
+            if(jugador == JUGADORB)
+                {
+                    switch(claseDeZombie[jugador][i])
+                    {
+                        case GUERRERO:
+                            cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x13000);
+                            break;
+                        case MAGO:
+                            cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x14000);
+                            break;
+                        case CLERIGO:
+                            cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x15000);
+                            break;
+                    }
+                    mapearCr3Tss(cr3, &tss_zombisB[i]);
+                }
             return;
         }
     }
@@ -296,41 +317,118 @@ void game_lanzar_zombi(unsigned int jugador)
 
 
 int coordenadas[2][9] = {
-                        {0x400000 + 0x1000*78*2 - 0x2000 , 0x400000 + 0x1000*78*2 - 0x3000, 0x400000 + 0x1000*78 - 0x3000, 0x400000 + 0x1000*78*3 - 0x3000,0x400000 + 0x1000*78 - 0x2000,0x400000 + 0x1000*78*3-0x2000,0x400000 + 0x1000*78*2-0x1000,0x400000 + 0x1000*78*3-0x1000,0x400000 + 0x1000*78 - 0x1000}, 
+                        { 0x401000 + 0x1000*78 , 0x400000 + 0x1000*78 , 0x400000, 0x400000 + 0x1000*78*3 ,0x401000, 0x401000 + 0x1000*78*2 , 0x403000 + 0x1000*78*2 , 0x403000 + 0x1000*78*3 , 0x402000}, 
                         { 0x401000 + 0x1000*78 , 0x402000 + 0x1000*78 , 0x402000 + 0x1000*78*2 , 0x402000, 0x401000 + 0x1000*78*2 , 0x401000, 0x400000 + 0x1000*78, 0x400000 , 0x400000 + 0x1000*78*2}};
 
-
-void mapearDirecciones(int jugador,int coordenadaJugadorAY,void **direccionReal)
+void mapearZombie(int jugador, int coordenadaX, int coordenadaY, void ** direccionReal)
 {
-	int i;
-	for(i = 0; i< 9; i++)
-	{
-		direccionReal[i] = (void*) coordenadas[jugador][i]+OFFSET_FILA*(coordenadaJugadorAY-1);
-	}
+    int i;
+    for(i = 0; i< 9; i++)
+    {
+        direccionReal[i] = (void*) coordenadas[jugador][i] + (OFFSET_FILA*(coordenadaY-1)) + (0x1000 * (coordenadaX -2));
+        
+        //chequear que estoy dentro del area de juego!
+    }
 }
+
+int algo[2][2] = {{ -1, 1 },{1, -1} };
 
 void game_move_current_zombi(direccion dir) 
 {
     unsigned int indice_tss = tss_current_tss();
+    unsigned int jugador;
+    int numeroDeZombie;
+
+
+    if(indice_tss < OFFSET_ZOMBIS_B)
+    {
+        numeroDeZombie = indice_tss-15;   
+        jugador = JUGADORA;
+    }
+    else
+    {
+        jugador = JUGADORB;
+        numeroDeZombie = indice_tss - (15+CANT_ZOMBIS);
+    }
+
     //DEPENDE DEL PUTO ZOMBIE
     //uso mmu_bla_bla para mapear
     switch(dir)
     {
         case IZQ:
-
+             coordenadaZombieY[jugador][numeroDeZombie] += algo[jugador][0];
             break;
         case DER:
-
+             coordenadaZombieY[jugador][numeroDeZombie] += algo[jugador][1];
             break;
         case ADE:
-            
+             coordenadaZombieX[jugador][numeroDeZombie] += algo[jugador][0];
             break;
         case ATR:
-
+             coordenadaZombieX[jugador][numeroDeZombie] += algo[jugador][1];
             break;
     }
-    indice_tss++;
+
+    if(coordenadaZombieX[jugador][numeroDeZombie] > 77)
+    {
+        clockZombie[jugador][numeroDeZombie] = CLOCK_MUERTO;
+        puntaje[JUGADORA]++;
+        coordenadaZombieX[jugador][numeroDeZombie] = -1;
+        coordenadaZombieY[jugador][numeroDeZombie] = -1;
+        //limpiar tss
+        return;
+    }
+     if(coordenadaZombieX[jugador][numeroDeZombie] < 2)
+    {
+        clockZombie[jugador][numeroDeZombie] = CLOCK_MUERTO;
+        puntaje[JUGADORB]++;
+        coordenadaZombieX[jugador][numeroDeZombie] = -1;
+        coordenadaZombieY[jugador][numeroDeZombie] = -1;
+        //limbiar tss
+        return;
+    }
+    if(coordenadaZombieY[jugador][numeroDeZombie] < 0)
+    {
+        coordenadaZombieY[jugador][numeroDeZombie] = LIMITE_DEL_TABLERO - 1;   
+    }
+    if(coordenadaZombieY[jugador][numeroDeZombie] > LIMITE_DEL_TABLERO)
+    {
+        coordenadaZombieY[jugador][numeroDeZombie] = 0;   
+    }
+
+    //acá remapeo las direcciones del zombie
+
+    void *direccionReal[9];
+    
+    mapearZombie(jugador, coordenadaZombieX[jugador][numeroDeZombie], coordenadaZombieY[jugador][numeroDeZombie], direccionReal);
+
+    //en vez de inicializar zombie, modifico la pagina
+    //este codigo no tiene que estar acá, pertenece mas a la mmu
+    void **cr3;
+    unsigned int pTable;
+    unsigned int aux = 0x08000000;
+    copiarPagina((void**) 0x08000000,(void**) CACHE_TAREA);
+    int i;
+
+    cr3 = (void**) rcr3();    
+    aux = aux >> 22;
+    pTable = (unsigned int) cr3[aux];
+    pTable = pTable >> 12;
+    pTable = pTable << 12;
+
+    for(i = 0; i <9 ;i++)
+    {
+        mapearAPagina01(direccionReal[i], (void*) 0x08000000 + 0x1000*i, (void*) pTable, 0x7);   
+    }
+
+    tlbflush();
+
+    copiarPagina((void**) CACHE_TAREA,(void**) 0x08000000);
 }
+
+
+
+
 
 int jugadorAlQueLeToca = JUGADORA;
 int anteriorZombie[] = {0,0};

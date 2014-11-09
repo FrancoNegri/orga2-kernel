@@ -462,6 +462,10 @@ _isr102:
     push eax
     call game_move_current_zombi
     add esp, 4
+    ;ok, hago taskswitch a idle
+    mov word [selector], 0x70
+    JMP far [offset]
+    
     popad
     iret
 

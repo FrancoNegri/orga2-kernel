@@ -155,7 +155,7 @@ void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned cha
 
 unsigned int tss_current_tss()
 {
-	int i;
+	unsigned int i;
 	for(i = 15; i< GDT_COUNT; i++)
 	{
 		//1011 -> la tarea esta busy
