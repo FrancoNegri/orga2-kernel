@@ -90,47 +90,50 @@ void cargarTSS_zombie()
 
 	for(i = 0; i < CANT_ZOMBIS; i++)
 	{
-		
-		tss_zombisA[i].esp0 = pedirPaginaVacia();
-		tss_zombisA[i].ss0 = 0x50;// que va???
-		//tss_zombisA[i].esp1 = 0x27000;
-		//tss_idle.ss1 = 0x50;
-		//tss_zombisA[i].esp2 = 0x27000;
-		//tss_idle.ss2 = 0x50;
-		tss_zombisA[i].cr3 = 0x27000; //se completa cuando creamos un zombie nuevo
-		tss_zombisA[i].eip = 0x08000000;
-		tss_zombisA[i].eflags = 0x202;
-		tss_zombisA[i].esp = 0x08001000;
-		tss_zombisA[i].ebp = 0x08001000;
-		tss_zombisA[i].es = 0x5B;
-		tss_zombisA[i].cs = 0x4B;
-		tss_zombisA[i].ss = 0x5B;
-		tss_zombisA[i].ds = 0x5B;
-		tss_zombisA[i].fs = 0x5B;
-		tss_zombisA[i].gs = 0x5B;
+		//nota:
+		//esto se setea en el momento en que game llama a tss_limpar_tss()
+
+
+		// tss_zombisA[i].esp0 = pedirPaginaVacia();
+		// tss_zombisA[i].ss0 = 0x50;// que va???
+		// //tss_zombisA[i].esp1 = 0x27000;
+		// //tss_idle.ss1 = 0x50;
+		// //tss_zombisA[i].esp2 = 0x27000;
+		// //tss_idle.ss2 = 0x50;
+		// tss_zombisA[i].cr3 = 0x27000; //se completa cuando creamos un zombie nuevo
+		// tss_zombisA[i].eip = 0x08000000;
+		// tss_zombisA[i].eflags = 0x202;
+		// tss_zombisA[i].esp = 0x08001000;
+		// tss_zombisA[i].ebp = 0x08001000;
+		// tss_zombisA[i].es = 0x5B;
+		// tss_zombisA[i].cs = 0x4B;
+		// tss_zombisA[i].ss = 0x5B;
+		// tss_zombisA[i].ds = 0x5B;
+		// tss_zombisA[i].fs = 0x5B;
+		// tss_zombisA[i].gs = 0x5B;
 		editarGDT(&gdt[i+15].base_0_15, &gdt[i+15].base_23_16, &gdt[i+15].base_31_24, &tss_zombisA[i]);
 	}
 
 	//01011011
 	for(i = 0; i < CANT_ZOMBIS; i++)
     {
-        tss_zombisB[i].esp0 = pedirPaginaVacia();
-		tss_zombisB[i].ss0 = 0x50;// que va???
-		//tss_zombisB[i].esp1 = 0x27000;
-		//tss_idle.ss1 = 0x50;
-		//tss_zombisB[i].esp2 = 0x27000;
-		//tss_idle.ss2 = 0x50;
-		tss_zombisB[i].cr3 = 0x00000; //se completa cuando creamos un zombie nuevo
-		tss_zombisB[i].eip = 0x08000000;
-		tss_zombisB[i].eflags = 0x202;
-		tss_zombisB[i].esp = 0x08001000;
-		tss_zombisB[i].ebp = 0x08001000;
-		tss_zombisB[i].es = 0x5B;
-		tss_zombisB[i].cs = 0x4B;
-		tss_zombisB[i].ss = 0x5B;
-		tss_zombisB[i].ds = 0x5B;
-		tss_zombisB[i].fs = 0x5B;
-		tss_zombisB[i].gs = 0x5B;
+  //       tss_zombisB[i].esp0 = pedirPaginaVacia();
+		// tss_zombisB[i].ss0 = 0x50;// que va???
+		// //tss_zombisB[i].esp1 = 0x27000;
+		// //tss_idle.ss1 = 0x50;
+		// //tss_zombisB[i].esp2 = 0x27000;
+		// //tss_idle.ss2 = 0x50;
+		// tss_zombisB[i].cr3 = 0x00000; //se completa cuando creamos un zombie nuevo
+		// tss_zombisB[i].eip = 0x08000000;
+		// tss_zombisB[i].eflags = 0x202;
+		// tss_zombisB[i].esp = 0x08001000;
+		// tss_zombisB[i].ebp = 0x08001000;
+		// tss_zombisB[i].es = 0x5B;
+		// tss_zombisB[i].cs = 0x4B;
+		// tss_zombisB[i].ss = 0x5B;
+		// tss_zombisB[i].ds = 0x5B;
+		// tss_zombisB[i].fs = 0x5B;
+		// tss_zombisB[i].gs = 0x5B;
         editarGDT(&gdt[i+23].base_0_15, &gdt[i+23].base_23_16, &gdt[i+23].base_31_24, &tss_zombisB[i]);
     }
 }

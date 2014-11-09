@@ -234,7 +234,7 @@ _isr17:
     jmp $
 
 errorZombie:
-    jmp $
+    ;jmp $
     mov word [selector], 0x70
     JMP far [offset]
 

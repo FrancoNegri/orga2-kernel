@@ -19,7 +19,8 @@ void mapearZombie(int jugador, int coordenadaX, int coordenadaY, void **direccio
 #define NEGRO 0x0000
 #define GRIS 0x0700
 
-#define BABA_DE_ZOMBIE 0x2458
+#define BABA_DE_ZOMBIE 0x2058
+#define ZOMBIE_MUERTO 0x2458
 
 //define clases de zombies
 #define CLERIGO 0x0743
@@ -39,6 +40,8 @@ void mapearZombie(int jugador, int coordenadaX, int coordenadaY, void **direccio
 #define JUGADORA 1
 #define JUGADORB 0
 
+#define CANTIDAD_DE_ZOMBIES_TOTAL 9
+
 int coordenadaJugadorY[CANTIDAD_DE_JUGADORES];
 
 short int claseDeProximoZombie[CANTIDAD_DE_JUGADORES];
@@ -57,6 +60,7 @@ int puntaje[CANTIDAD_DE_JUGADORES];
 int cantidadDeZombiesDisponibles[CANTIDAD_DE_JUGADORES];
 
 short int matrizDelTerreno[SIZE_H][SIZE_W];
+
 //graficos del juego
 
 void game_inicializarMapa()
@@ -67,7 +71,7 @@ void game_inicializarMapa()
         coordenadaJugadorY[j] = 25;
         claseDeProximoZombie[j] = GUERRERO;
         puntaje[j]=0;
-        cantidadDeZombiesDisponibles[j] = CANT_ZOMBIS;       
+        cantidadDeZombiesDisponibles[j] = CANTIDAD_DE_ZOMBIES_TOTAL;       
         //inicializo los zombies fuera del mapa y en estados invalidos
         for(i = 0; i < CANT_ZOMBIS; i++)
         {
@@ -301,6 +305,7 @@ void game_lanzar_zombi(unsigned int jugador)
                             break;
 
                     }
+                    tss_limpar_tss(&tss_zombisA[i]);
                     mapearCr3Tss(cr3, &tss_zombisA[i]);
                 }
             if(jugador == JUGADORB)
@@ -317,6 +322,7 @@ void game_lanzar_zombi(unsigned int jugador)
                             cr3 = mmu_inicializar_zombie(direccionReal, (void*) 0x15000);
                             break;
                     }
+                    tss_limpar_tss(&tss_zombisB[i]);
                     mapearCr3Tss(cr3, &tss_zombisB[i]);
                 }
             return;
@@ -507,12 +513,13 @@ int game_error_handling()
             numeroDeZombie = indice_tss - (15+CANT_ZOMBIS);
         }
 
-        matrizDelTerreno[coordenadaZombieY[jugador][numeroDeZombie]][coordenadaZombieX[jugador][numeroDeZombie]] = 0x2458;
+        clockZombie[jugador][numeroDeZombie] = CLOCK_MUERTO;
 
-        if(jugador == JUGADORA)
-            tss_limpar_tss(&tss_zombisA[numeroDeZombie]);
-        if(jugador == JUGADORB)
-            tss_limpar_tss(&tss_zombisB[numeroDeZombie]);
+        matrizDelTerreno[coordenadaZombieY[jugador][numeroDeZombie]][coordenadaZombieX[jugador][numeroDeZombie]] = ZOMBIE_MUERTO;
+        coordenadaZombieY[jugador][numeroDeZombie] = -1;
+        coordenadaZombieX[jugador][numeroDeZombie] = -1;
+
+
         return 0;
     }
 
