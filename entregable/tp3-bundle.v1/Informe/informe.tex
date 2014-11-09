@@ -83,7 +83,8 @@ En el presente informe, se detallará de manera mas elaborada todo lo hecho para
 \clearpage
 
 \section{Ejercicio 1:}
-
+En esta sección se ha completado la gdt con las primeras 7 posiciones 
+(no se como ponerle que basicamente pusimos basura para que si la usamos, rompa(ALE)). Luego, hemos puesto 4 segmentos, dos para codigo de nivel 0 y 3, y dos para datos de nivel 0 y 3. Para mayor entendimiento del código, se han usado defines, con nombres que expresan que representan(por ejemplo, el segmento destinado a codigo de nivel 0, se llama GDT_IDX_CDE_LVL_0). Estos segmentos direccionan los primeros 623 MB de memoria. Tambien se ha declarado un segmento que describe el area de la pantalla en memoria que puede ser utilizado solo por el kernel. Esto se utilizará al principio para imprimir por pantalla, pero más avanzado el trabajo se necesitaran imprimir muchas cosas, y C provee herramientas más comodas para esto. Dado que la convención C nos pide que todos los segmentos de datos apunten al mismo segmento, este segmento termina quedando en desuso. (aca hay que poner que completamos codigo parapasar a modo protegido y setearl la pila del kernel en 0x27000... lo escribimos directamente??... tambien falta el punto d... es necesario?? no es un ejercicio de transicion que despues no va a tener la menor importancia?? (ALE))
 
 %\input{GDT/gdt.tex}
 
