@@ -19,6 +19,8 @@ void mapearZombie(int jugador, int coordenadaX, int coordenadaY, void **direccio
 #define NEGRO 0x0000
 #define GRIS 0x0700
 
+#define BABA_DE_ZOMBIE 0x2458
+
 //define clases de zombies
 #define CLERIGO 0x0743
 #define MAGO 0x074D
@@ -54,6 +56,7 @@ int puntaje[CANTIDAD_DE_JUGADORES];
 
 int cantidadDeZombiesDisponibles[CANTIDAD_DE_JUGADORES];
 
+short int matrizDelTerreno[SIZE_H][SIZE_W];
 //graficos del juego
 
 void game_inicializarMapa()
@@ -74,6 +77,12 @@ void game_inicializarMapa()
             clockZombie[j][i] = CLOCK_MUERTO;
         }
     }
+
+    for(i = 0; i < SIZE_H; i++)
+        for(j = 0; j < SIZE_W; j++)
+        {
+            matrizDelTerreno[i][j] = VERDE;
+        }
 
     game_actualizarFrame();
     return;
@@ -102,7 +111,7 @@ void game_actualizarFrame()
         pixel[i][79] = ROJO;
         for(j=1; j< 79;j++)
         {
-            pixel[i][j] = VERDE;
+            pixel[i][j] = matrizDelTerreno[i][j];
         }
     }
 
@@ -126,7 +135,7 @@ void game_actualizarFrame()
         for(j = 0; j < CANTIDAD_DE_JUGADORES; j++)
             if(game_zombieEnEstadoValido(coordenadaZombieX[j][i],coordenadaZombieY[j][i]))
             {
-                pixel[coordenadaZombieY[j][i]][coordenadaZombieX[j][i]] = claseDeZombie[j][i];
+                pixel[coordenadaZombieY[j][i]][coordenadaZombieX[j][i]] = claseDeZombie[j][i] + 0x1A00;
             }
     }
 
@@ -164,8 +173,8 @@ void game_actualizarFrame()
     	}
     }
 
-    pixel[47][35] = puntaje[JUGADORA] + 0x0730;
-    pixel[47][45] = puntaje[JUGADORB] + 0x0730;
+    pixel[47][35] = puntaje[JUGADORA] + 0x0730 + 0x3900;
+    pixel[47][45] = puntaje[JUGADORB] + 0x0730 + 0x2900;
 
     pixel[47][30] = cantidadDeZombiesDisponibles[JUGADORA] + 0x0730;
     pixel[47][51] = cantidadDeZombiesDisponibles[JUGADORB] + 0x0730;
@@ -200,8 +209,8 @@ void game_moverJugador(int numeroDeJugador,int cantidadPosiciones)
     coordenadaJugadorY[numeroDeJugador] += cantidadPosiciones;
     //para que no se salga del area de juego
     if(coordenadaJugadorY[numeroDeJugador] < 0)
-        coordenadaJugadorY[numeroDeJugador] = LIMITE_DEL_TABLERO -1;
-    if(coordenadaJugadorY[numeroDeJugador] > LIMITE_DEL_TABLERO - 1)
+        coordenadaJugadorY[numeroDeJugador] = SIZE_H -1;
+    if(coordenadaJugadorY[numeroDeJugador] > SIZE_H -1)
         coordenadaJugadorY[numeroDeJugador] = 0;
 }
 
@@ -241,6 +250,7 @@ void game_actualizarClockZombie(int numeroDeJugador,int numeroDeZombie)
 {
 	if(clockZombie[numeroDeJugador][numeroDeZombie] != CLOCK_MUERTO)
 		clockZombie[numeroDeJugador][numeroDeZombie]++;
+
 	if(clockZombie[numeroDeJugador][numeroDeZombie] > 8)
 		clockZombie[numeroDeJugador][numeroDeZombie] = 1;
 }
@@ -254,7 +264,7 @@ void game_lanzar_zombi(unsigned int jugador)
     for(i = 0; i < CANT_ZOMBIS; i++)
     {
     //esto quiere decir que el slot esta vacio, lo uso para el zombie nuevo
-        if(clockZombie[jugador][i] == CLOCK_MUERTO)
+        if(clockZombie[jugador][i] == CLOCK_MUERTO && cantidadDeZombiesDisponibles[jugador] > 0)
         {
             cantidadDeZombiesDisponibles[jugador]--;
                 //lo saco de su estado muerto
@@ -327,6 +337,17 @@ void mapearZombie(int jugador, int coordenadaX, int coordenadaY, void ** direcci
     {
         direccionReal[i] = (void*) coordenadas[jugador][i] + (OFFSET_FILA*(coordenadaY-1)) + (0x1000 * (coordenadaX -2));
         
+        int aux = (int) direccionReal[i]; 
+
+        if(aux < COMIENZO_DEL_MAPA)
+        {
+          direccionReal[i] += TAMANIO_DEL_MAPA;   
+        }
+
+        if(aux >= FIN_DEL_MAPA)
+        {
+          direccionReal[i] -= TAMANIO_DEL_MAPA;   
+        }
         //chequear que estoy dentro del area de juego!
     }
 }
@@ -353,6 +374,8 @@ void game_move_current_zombi(direccion dir)
 
     //DEPENDE DEL PUTO ZOMBIE
     //uso mmu_bla_bla para mapear
+    matrizDelTerreno[coordenadaZombieY[jugador][numeroDeZombie]][coordenadaZombieX[jugador][numeroDeZombie]] = BABA_DE_ZOMBIE;
+
     switch(dir)
     {
         case IZQ:
@@ -375,23 +398,31 @@ void game_move_current_zombi(direccion dir)
         puntaje[JUGADORA]++;
         coordenadaZombieX[jugador][numeroDeZombie] = -1;
         coordenadaZombieY[jugador][numeroDeZombie] = -1;
+        if(jugador == JUGADORA)
+            tss_limpar_tss(&tss_zombisA[numeroDeZombie]);
+        if(jugador == JUGADORB)
+            tss_limpar_tss(&tss_zombisB[numeroDeZombie]);
         //limpiar tss
         return;
     }
-     if(coordenadaZombieX[jugador][numeroDeZombie] < 2)
+    if(coordenadaZombieX[jugador][numeroDeZombie] < 2)
     {
         clockZombie[jugador][numeroDeZombie] = CLOCK_MUERTO;
         puntaje[JUGADORB]++;
         coordenadaZombieX[jugador][numeroDeZombie] = -1;
         coordenadaZombieY[jugador][numeroDeZombie] = -1;
+
+        tss_limpar_tss(&tss_zombisB[numeroDeZombie]);
         //limbiar tss
+        tlbflush();
+
         return;
     }
     if(coordenadaZombieY[jugador][numeroDeZombie] < 0)
     {
-        coordenadaZombieY[jugador][numeroDeZombie] = LIMITE_DEL_TABLERO - 1;   
+        coordenadaZombieY[jugador][numeroDeZombie] = SIZE_H - 1;   
     }
-    if(coordenadaZombieY[jugador][numeroDeZombie] > LIMITE_DEL_TABLERO)
+    if(coordenadaZombieY[jugador][numeroDeZombie] > SIZE_H - 1)
     {
         coordenadaZombieY[jugador][numeroDeZombie] = 0;   
     }
@@ -402,28 +433,8 @@ void game_move_current_zombi(direccion dir)
     
     mapearZombie(jugador, coordenadaZombieX[jugador][numeroDeZombie], coordenadaZombieY[jugador][numeroDeZombie], direccionReal);
 
-    //en vez de inicializar zombie, modifico la pagina
-    //este codigo no tiene que estar acá, pertenece mas a la mmu
-    void **cr3;
-    unsigned int pTable;
-    unsigned int aux = 0x08000000;
-    copiarPagina((void**) 0x08000000,(void**) CACHE_TAREA);
-    int i;
+    mmu_remapearPaginasZombie(direccionReal);
 
-    cr3 = (void**) rcr3();    
-    aux = aux >> 22;
-    pTable = (unsigned int) cr3[aux];
-    pTable = pTable >> 12;
-    pTable = pTable << 12;
-
-    for(i = 0; i <9 ;i++)
-    {
-        mapearAPagina01(direccionReal[i], (void*) 0x08000000 + 0x1000*i, (void*) pTable, 0x7);   
-    }
-
-    tlbflush();
-
-    copiarPagina((void**) CACHE_TAREA,(void**) 0x08000000);
 }
 
 
@@ -469,4 +480,41 @@ unsigned short game_proximo_zombie()
         i++;
     }
 	return INDICE_NO_ENCONTRADO;
+}
+
+int game_error_handling()
+{
+    unsigned int indice_tss = tss_current_tss();
+    int jugador;
+    int numeroDeZombie;
+
+    if(indice_tss == 0)
+    {
+        //el error fue producido por una tss que no pertenece a zombie
+        //error del sistema
+        return 1;
+    }
+    else
+    {
+        if(indice_tss < OFFSET_ZOMBIS_B)
+        {
+            numeroDeZombie = indice_tss-15;   
+            jugador = JUGADORA;
+        }
+        else
+        {
+            jugador = JUGADORB;
+            numeroDeZombie = indice_tss - (15+CANT_ZOMBIS);
+        }
+
+        matrizDelTerreno[coordenadaZombieY[jugador][numeroDeZombie]][coordenadaZombieX[jugador][numeroDeZombie]] = 0x2458;
+
+        if(jugador == JUGADORA)
+            tss_limpar_tss(&tss_zombisA[numeroDeZombie]);
+        if(jugador == JUGADORB)
+            tss_limpar_tss(&tss_zombisB[numeroDeZombie]);
+        return 0;
+    }
+
+
 }

@@ -120,7 +120,7 @@ mp:
 
     ; Inicializar tss de la tarea Idle
 
-        ;se hace en tss_inicializar
+        call inicializarTareaIdle
 
     ; Inicializar el scheduler
 
@@ -188,6 +188,7 @@ extern tss_inicializar
 extern game_inicializarMapa
 extern game_actualizarFrame
 extern cargarTSS_zombie
+extern inicializarTareaIdle
 ;;
 ;; Seccion de datos.
 ;; -------------------------------------------------------------------------- ;;

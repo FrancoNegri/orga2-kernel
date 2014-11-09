@@ -151,4 +151,29 @@ void unmapearADirectorio(void* direccionVirtual,void** direcorio)
 	return;
 }
 
+
+void mmu_remapearPaginasZombie(void** direccionReal)
+{
+	void **cr3;
+    unsigned int pTable;
+    unsigned int aux = 0x08000000;
+    copiarPagina((void**) 0x08000000,(void**) CACHE_TAREA);
+    int i;
+
+    cr3 = (void**) rcr3();    
+    aux = aux >> 22;
+    pTable = (unsigned int) cr3[aux];
+    pTable = pTable >> 12;
+    pTable = pTable << 12;
+
+    for(i = 0; i <9 ;i++)
+    {
+        mapearAPagina01(direccionReal[i], (void*) 0x08000000 + 0x1000*i, (void*) pTable, 0x7);   
+    }
+
+    tlbflush();
+
+    copiarPagina((void**) CACHE_TAREA,(void**) 0x08000000);
+}
+
 /*para mapear las paginas del zombie, vamos a tener que tomar el ancho de fila (78 x 2^10 (1 kb) * 4 )*/

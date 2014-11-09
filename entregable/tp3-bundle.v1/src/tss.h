@@ -68,4 +68,6 @@ void mapearCr3Tss(void *cr3, tss *someTss);
 
 unsigned int tss_current_tss();
 
+void tss_limpar_tss(tss *someTss);
+
 #endif  /* !__TSS_H__ */

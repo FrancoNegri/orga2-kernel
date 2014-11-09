@@ -18,6 +18,35 @@ unsigned int proximaPaginaVacia;
 unsigned int contadorPaginasVacias;
 
 void tss_inicializar() {
+
+		// tss_inicial.esp0 = 0x27000 ;
+		// //tss_inicial.ss0;// que va???
+		// tss_inicial.esp1 = 0x27000;
+		// //tss_inicial.ss1; // que va???
+		// tss_inicial.esp2 = 0x27000;
+		// //tss_inicial.ss2;// que va???
+		// tss_inicial.cr3 = 0x27000;
+		// tss_inicial.eip = 0x17000;
+		// tss_inicial.eflags = 0x0002;
+		// tss_inicial.esp = 0x27000;
+		// tss_inicial.ebp = 0x27000;
+		// tss_inicial.es = 0x50;
+		// tss_inicial.cs = 0x40;
+		// tss_inicial.ss = 0x50;
+		// tss_inicial.ds = 0x50;
+		// tss_inicial.fs = 0x50;
+		// tss_inicial.gs = 0x50;
+		//ver esto e ir a casa
+		//por hay esto no es necesario porque solo se va a usar para guardar el estado 
+		//de la cpu al saltar a la primera tarea
+		proximaPaginaVacia = PAGINAS_LIBRES_TSS;
+		contadorPaginasVacias = 0;
+
+	    editarGDT( &gdt[GDT_IDX_TSS_0].base_0_15,&gdt[GDT_IDX_TSS_0].base_23_16,&gdt[GDT_IDX_TSS_0].base_31_24, &tss_inicial);
+}
+
+void inicializarTareaIdle()
+{
 		tss_idle.esp0 = 0x27000 ;
 		tss_idle.ss0 = 0x50;// que va???
 		tss_idle.esp1 = 0x27000;
@@ -35,36 +64,9 @@ void tss_inicializar() {
 		tss_idle.ds = 0x50;
 		tss_idle.fs = 0x50;
 		tss_idle.gs = 0x50;
-		//borramos... ldt
-
-		tss_inicial.esp0 = 0x27000 ;
-		//tss_inicial.ss0;// que va???
-		tss_inicial.esp1 = 0x27000;
-		//tss_inicial.ss1; // que va???
-		tss_inicial.esp2 = 0x27000;
-		//tss_inicial.ss2;// que va???
-		tss_inicial.cr3 = 0x27000;
-		tss_inicial.eip = 0x17000;
-		tss_inicial.eflags = 0x0002;
-		tss_inicial.esp = 0x27000;
-		tss_inicial.ebp = 0x27000;
-		tss_inicial.es = 0x50;
-		tss_inicial.cs = 0x40;
-		tss_inicial.ss = 0x50;
-		tss_inicial.ds = 0x50;
-		tss_inicial.fs = 0x50;
-		tss_inicial.gs = 0x50;
-		//ver esto e ir a casa
-		//por hay esto no es necesario porque solo se va a usar para guardar el estado 
-		//de la cpu al saltar a la primera tarea
-		proximaPaginaVacia = PAGINAS_LIBRES_TSS;
-		contadorPaginasVacias = 0;
-
-
-	    editarGDT( &gdt[GDT_IDX_TSS_0].base_0_15,&gdt[GDT_IDX_TSS_0].base_23_16,&gdt[GDT_IDX_TSS_0].base_31_24, &tss_inicial);
 	    editarGDT( &gdt[GDT_IDX_TSS_1].base_0_15,&gdt[GDT_IDX_TSS_1].base_23_16,&gdt[GDT_IDX_TSS_1].base_31_24, &tss_idle);
-}
 
+}
 
 void cargarTSS_zombie()
 {
@@ -95,7 +97,7 @@ void cargarTSS_zombie()
 		//tss_idle.ss1 = 0x50;
 		//tss_zombisA[i].esp2 = 0x27000;
 		//tss_idle.ss2 = 0x50;
-		tss_zombisA[i].cr3 = 0x00000; //se completa cuando creamos un zombie nuevo
+		tss_zombisA[i].cr3 = 0x27000; //se completa cuando creamos un zombie nuevo
 		tss_zombisA[i].eip = 0x08000000;
 		tss_zombisA[i].eflags = 0x202;
 		tss_zombisA[i].esp = 0x08001000;
@@ -134,6 +136,24 @@ void cargarTSS_zombie()
 }
 
 //1011000
+
+void tss_limpar_tss(tss *someTss)
+{
+		(*someTss).esp0 = pedirPaginaVacia();
+		(*someTss).ss0 = 0x50;
+		(*someTss).cr3 = 0x00000;
+		(*someTss).eip = 0x08000000;
+		(*someTss).eflags = 0x202;
+		(*someTss).esp = 0x08001000;
+		(*someTss).ebp = 0x08001000;
+		(*someTss).es = 0x5B;
+		(*someTss).cs = 0x4B;
+		(*someTss).ss = 0x5B;
+		(*someTss).ds = 0x5B;
+		(*someTss).fs = 0x5B;
+		(*someTss).gs = 0x5B;
+}
+
 
 void editarGDT(unsigned short *base_0_15, unsigned char *base_23_16,unsigned char *base_31_24, void* tss)
 {
