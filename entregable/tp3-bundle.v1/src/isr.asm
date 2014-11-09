@@ -107,76 +107,117 @@ global _isr4
 global _isr6
 global _isr7
 
-
+extern game_error_handling
 ;en caso de que el error sea en la pila, esto podria traer porblemas
 extern print
 _isr0:
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int0_capturada, int0_capturada_len, 0x07, 20, 30
     jmp $
 
 _isr1:
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int1_capturada, int1_capturada_len, 0x07, 20, 30
     jmp $
 
 _isr2:
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int2_capturada, int2_capturada_len, 0x07, 20, 30
     jmp $
 
 _isr3:
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int3_capturada, int3_capturada_len, 0x07, 20, 30
     jmp $
 
 _isr4:
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int4_capturada, int4_capturada_len, 0x07, 20, 30
     jmp $
 
 _isr5:;BOUND Range Exceeded Exception
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int5_capturada, int5_capturada_len, 0x07, 20, 30
     jmp $
 
 _isr6:
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int6_capturada, int6_capturada_len, 0x07, 20, 30
     jmp $
 
 _isr7:
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int7_capturada, int7_capturada_len, 0x07, 20, 30
     jmp $
 
 _isr8:;Double Fault Exception
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int8_capturada, int8_capturada_len, 0x07, 20, 30
     
     jmp imprimirErrorCode
     jmp $
 
 _isr9:;Coprocessor Segment Overrun
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int9_capturada, int9_capturada_len, 0x07, 20, 30
     jmp $
 
 _isr10:;invalid TSS
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int10_capturada, int10_capturada_len, 0x07, 20, 30
     jmp imprimirErrorCode
     jmp $
 
 _isr11:;Segment Not Present
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int11_capturada, int11_capturada_len, 0x07, 20, 30
     jmp imprimirErrorCode
     jmp $
 
 _isr12:;Stack Fault Exception
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int12_capturada, int12_capturada_len, 0x07, 20, 30
     jmp imprimirErrorCode
     jmp $
 
 _isr13:
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int13_capturada, int13_capturada_len, 0x07, 20, 30
     jmp imprimirErrorCode
     jmp $
 
 _isr14:
-    ;algo malo pasa con la paginacion, primero la apago
-    ;mov eax, cr0                
-    ;and  eax, 0x7FFFFFFF     
-    ;mov cr0, eax
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
 
     imprimir_texto_mp int14_capturada, int14_capturada_len, 0x07, 20, 30
     
@@ -185,9 +226,17 @@ _isr14:
     
 
 _isr17:
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
     imprimir_texto_mp int17_capturada, int17_capturada_len, 0x07, 20, 30
     jmp imprimirErrorCode
     jmp $
+
+errorZombie:
+    ;jmp $
+    mov word [selector], 0x70
+    JMP far [offset]
 
 
 text_code: db "Code Error:"
@@ -233,7 +282,6 @@ _isr32:
         jmp .end
 .noJump:
     call fin_intr_pic1    
-
 .end:
     
     popad
