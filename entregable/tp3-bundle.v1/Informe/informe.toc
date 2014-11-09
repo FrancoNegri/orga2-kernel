@@ -1,8 +1,7 @@
 \select@language {spanish}
 \contentsline {section}{\numberline {1}Objetivos generales}{3}
-\contentsline {section}{\numberline {2}Preambulo}{4}
-\contentsline {section}{\numberline {3}GDT}{5}
-\contentsline {section}{\numberline {4}Interrupciones}{6}
-\contentsline {section}{\numberline {5}MMU}{7}
-\contentsline {section}{\numberline {6}Paginaci\IeC {\'o}n}{8}
-\contentsline {section}{\numberline {7}Scheduler}{9}
+\contentsline {section}{\numberline {2}GDT}{4}
+\contentsline {section}{\numberline {3}Interrupciones}{5}
+\contentsline {section}{\numberline {4}MMU}{6}
+\contentsline {section}{\numberline {5}Paginaci\IeC {\'o}n}{7}
+\contentsline {section}{\numberline {6}Scheduler}{8}
