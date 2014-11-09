@@ -107,191 +107,6 @@ global _isr4
 global _isr6
 global _isr7
 
-extern game_error_handling
-;en caso de que el error sea en la pila, esto podria traer porblemas
-extern print
-_isr0:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int0_capturada, int0_capturada_len, 0x07, 20, 30
-    jmp $
-
-_isr1:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int1_capturada, int1_capturada_len, 0x07, 20, 30
-    jmp $
-
-_isr2:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int2_capturada, int2_capturada_len, 0x07, 20, 30
-    jmp $
-
-_isr3:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int3_capturada, int3_capturada_len, 0x07, 20, 30
-    jmp $
-
-_isr4:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int4_capturada, int4_capturada_len, 0x07, 20, 30
-    jmp $
-
-_isr5:;BOUND Range Exceeded Exception
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int5_capturada, int5_capturada_len, 0x07, 20, 30
-    jmp $
-
-_isr6:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int6_capturada, int6_capturada_len, 0x07, 20, 30
-    jmp $
-
-_isr7:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int7_capturada, int7_capturada_len, 0x07, 20, 30
-    jmp $
-
-_isr8:;Double Fault Exception
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int8_capturada, int8_capturada_len, 0x07, 20, 30
-    
-    jmp imprimirErrorCode
-    jmp $
-
-_isr9:;Coprocessor Segment Overrun
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int9_capturada, int9_capturada_len, 0x07, 20, 30
-    jmp $
-
-_isr10:;invalid TSS
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int10_capturada, int10_capturada_len, 0x07, 20, 30
-    jmp imprimirErrorCode
-    jmp $
-
-_isr11:;Segment Not Present
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int11_capturada, int11_capturada_len, 0x07, 20, 30
-    jmp imprimirErrorCode
-    jmp $
-
-_isr12:;Stack Fault Exception
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int12_capturada, int12_capturada_len, 0x07, 20, 30
-    jmp imprimirErrorCode
-    jmp $
-
-_isr13:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int13_capturada, int13_capturada_len, 0x07, 20, 30
-    jmp imprimirErrorCode
-    jmp $
-
-_isr14:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-
-    imprimir_texto_mp int14_capturada, int14_capturada_len, 0x07, 20, 30
-    
-    jmp imprimirErrorCode
-    jmp $
-    
-
-_isr17:
-    call game_error_handling
-    cmp eax, 0
-    je errorZombie
-    imprimir_texto_mp int17_capturada, int17_capturada_len, 0x07, 20, 30
-    jmp imprimirErrorCode
-    jmp $
-
-errorZombie:
-    ;jmp $
-    mov word [selector], 0x70
-    JMP far [offset]
-
-
-text_code: db "Code Error:"
-text_code_len equ $ - text_code
-
-imprimirErrorCode:
-    imprimir_texto_mp text_code, text_code_len, 0x07, 21, 30
-    mov edi, [esp+4]
-    push 0x07
-    push 22
-    push 30
-    push 8
-    push dword edi
-    call print_hex
-    jmp $
-
-
-;;
-;; Rutina de atención del RELOJ
-;; -------------------------------------------------------------------------- ;;
-
-offset dd 0
-selector dw 0x70
-
-global _isr32
-_isr32:
-    pushad
-
-        
-    ;xchg bx, bx
-    ;con cada tic del reloj, actualizo la pantalla
-    call game_actualizarFrame
-
-    call proximo_reloj
-    ;pido la proxima tarea
-    call sched_proximo_indice
-
-    cmp ax,[selector]
-    je  .noJump
-        mov [selector], ax
-        call fin_intr_pic1  
-        JMP far [offset]  
-        jmp .end
-.noJump:
-    call fin_intr_pic1    
-.end:
-    
-    popad
-    iret
-
-;;
-;; Rutina de atención del TECLADO
-;; -------------------------------------------------------------------------- ;;
-
-
 
 %define Tab 0x0f
 %define Q 0x10
@@ -363,6 +178,303 @@ _isr32:
 ;%define Keypad 0x52
 %define Keypad/Del 0x53
 
+extern game_error_handling
+;en caso de que el error sea en la pila, esto podria traer porblemas
+extern print
+_isr0:
+    push ebp
+    mov ebp, esp
+    pushad
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int0_capturada, int0_capturada_len, 0x07, 20, 30
+    jmp $
+
+_isr1:
+    push ebp
+    mov ebp, esp
+    pushad
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int1_capturada, int1_capturada_len, 0x07, 20, 30
+    jmp $
+
+_isr2:
+    push ebp
+    mov ebp, esp
+    pushad
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int2_capturada, int2_capturada_len, 0x07, 20, 30
+    jmp $
+
+_isr3:
+    push ebp
+    mov ebp, esp
+    pushad
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int3_capturada, int3_capturada_len, 0x07, 20, 30
+    jmp $
+
+_isr4:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int4_capturada, int4_capturada_len, 0x07, 20, 30
+    jmp $
+
+_isr5:;BOUND Range Exceeded Exception
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int5_capturada, int5_capturada_len, 0x07, 20, 30
+    jmp $
+
+_isr6:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int6_capturada, int6_capturada_len, 0x07, 20, 30
+    jmp $
+
+_isr7:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int7_capturada, int7_capturada_len, 0x07, 20, 30
+    jmp $
+
+_isr8:;Double Fault Exception
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int8_capturada, int8_capturada_len, 0x07, 20, 30
+    
+    jmp imprimirErrorCode
+    jmp $
+
+_isr9:;Coprocessor Segment Overrun
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int9_capturada, int9_capturada_len, 0x07, 20, 30
+    jmp $
+
+_isr10:;invalid TSS
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int10_capturada, int10_capturada_len, 0x07, 20, 30
+    jmp imprimirErrorCode
+    jmp $
+
+_isr11:;Segment Not Present
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int11_capturada, int11_capturada_len, 0x07, 20, 30
+    jmp imprimirErrorCode
+    jmp $
+
+_isr12:;Stack Fault Exception
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int12_capturada, int12_capturada_len, 0x07, 20, 30
+    jmp imprimirErrorCode
+    jmp $
+
+_isr13:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int13_capturada, int13_capturada_len, 0x07, 20, 30
+    jmp imprimirErrorCode
+    jmp $
+
+_isr14:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+
+    imprimir_texto_mp int14_capturada, int14_capturada_len, 0x07, 20, 30
+    
+    jmp imprimirErrorCode
+    jmp $
+    
+
+_isr17:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call game_error_handling
+    cmp eax, 0
+    je errorZombie
+    imprimir_texto_mp int17_capturada, int17_capturada_len, 0x07, 20, 30
+    jmp imprimirErrorCode
+    jmp $
+
+extern game_imprimir_stack
+DEBUG_MODE dd 0x0
+AUX dd 0x0
+
+errorZombie:
+    cmp dword [DEBUG_MODE], 0
+    jz .salto
+;imprimo las cosas modo debug
+    popad
+
+    mov dword [AUX],eax
+
+    ; mov eax, cr4
+    ; push eax
+    ; mov eax,cr3
+    ; push eax
+    ; mov eax,cr2
+    ; push eax
+    ; mov eax,cr1
+    ; push eax
+    PUSH 1
+    PUSH 1
+    PUSH 1
+    PUSH 1
+
+    mov eax, [AUX]
+
+    push dword [ebp +12];eflags
+    push  ss 
+    push  gs
+    push  fs
+    push es
+    push ds
+    push  cs
+    push dword [ebp+4];eip
+    push  esp
+    push  ebp
+    push  edi
+    push  esi
+    push  edx
+    push  ecx
+    push  ebx
+    push  eax
+    call game_imprimir_stack    
+    add esp, 20*4
+;me quedo haciendo pooling de la tecla Y
+.pooling:
+    in al, 0x60
+    cmp al, Y
+    jnz .pooling
+.salto:
+    mov word [selector], 0x70
+    JMP far [offset]
+    ;bueno, ya maté la tarea, salto a idle
+
+text_code: db "Code Error:"
+text_code_len equ $ - text_code
+
+imprimirErrorCode:
+    imprimir_texto_mp text_code, text_code_len, 0x07, 21, 30
+    mov edi, [esp+4]
+    push 0x07
+    push 22
+    push 30
+    push 8
+    push dword edi
+    call print_hex
+    jmp $
+
+
+;;
+;; Rutina de atención del RELOJ
+;; -------------------------------------------------------------------------- ;;
+
+offset dd 0
+selector dw 0x70
+
+global _isr32
+_isr32:
+    pushad
+
+        
+    ;xchg bx, bx
+    ;con cada tic del reloj, actualizo la pantalla
+    call game_actualizarFrame
+
+    call proximo_reloj
+    ;pido la proxima tarea
+    call sched_proximo_indice
+
+    cmp ax,[selector]
+    je  .noJump
+        mov [selector], ax
+        call fin_intr_pic1  
+        JMP far [offset]  
+        jmp .end
+.noJump:
+    call fin_intr_pic1    
+.end:
+    
+    popad
+    iret
+
+;;
+;; Rutina de atención del TECLADO
+;; -------------------------------------------------------------------------- ;;
+
+
+
+
+
 coordenadaX dd 40
 coordenadaY dd 25
 
@@ -414,7 +526,7 @@ _isr33:
     cmp al, T
     jz .fin
     cmp al, Y
-    jz .fin
+    jz .Y
     cmp al, Z
     jz .fin
     cmp al, V
@@ -425,6 +537,9 @@ _isr33:
     jz .LShift
     jmp .fin
 
+.Y:
+    mov dword [DEBUG_MODE], 1
+    jmp .fin
 .I:
     ; moverJugadorA(1);
     push -1

@@ -61,6 +61,7 @@ int cantidadDeZombiesDisponibles[CANTIDAD_DE_JUGADORES];
 
 short int matrizDelTerreno[SIZE_H][SIZE_W];
 
+int DEBUGMODE;
 //graficos del juego
 
 void game_inicializarMapa()
@@ -88,6 +89,7 @@ void game_inicializarMapa()
             matrizDelTerreno[i][j] = VERDE;
         }
 
+    DEBUGMODE = 0;
     game_actualizarFrame();
     return;
 }
@@ -522,6 +524,117 @@ int game_error_handling()
 
         return 0;
     }
+
+
+}
+
+
+void iniciarDebugMode()
+{
+    DEBUGMODE = 1;
+}
+
+void game_imprimir_stack(unsigned int eax,unsigned int ebx,unsigned int ecx,unsigned int edx,unsigned int esi,unsigned int edi,unsigned int ebp,unsigned int esp,unsigned int eip,unsigned short int sc,unsigned short  int ds,unsigned short  int es,unsigned short int fs,unsigned short int gs,unsigned short int ss, unsigned int eflags, unsigned int cr1, unsigned int cr2, unsigned int cr3, unsigned int cr4)
+{
+    short int *puntero = (short int *) CACHE_VIDEO;
+    short int (*pixel)[80] = (short int (*)[80]) puntero;
+
+    short int *punteroABufferDeVideo = (short int *) VIDEO;
+    short int (*bufferDeVideo)[80] = (short int (*)[80]) punteroABufferDeVideo;
+    int i,j;
+    unsigned int indice_tss = tss_current_tss();
+    int numeroDeZombie, jugador;
+
+    unsigned int l0 = rcr0();
+    unsigned int l1 = rcr1();
+    unsigned int l2= rcr2();
+    unsigned int l3= rcr3();
+    unsigned int l4= rcr4();
+
+
+
+
+    for( i = 5 ; i < 30; i++ ) //para pantalla completa es 50
+    {
+        for(j=20; j< 60;j++)
+        {
+            pixel[i][j] = 0x07000;
+            bufferDeVideo[i][j] = pixel[i][j];
+        }
+    }
+
+    if(indice_tss < OFFSET_ZOMBIS_B)
+    {
+        print("Zombie A",26, 8, 0x370 );
+        jugador = JUGADORA;
+        numeroDeZombie = indice_tss-15;
+    }
+    else
+    {
+        print("Zombie B",26, 8, 0x370 );
+        jugador = JUGADORB;
+        numeroDeZombie = indice_tss - (15+CANT_ZOMBIS);
+    }
+
+    switch(claseDeZombie[jugador][numeroDeZombie])
+    {
+        case GUERRERO:
+            print("GUERRERO",35, 8, 0x370 );
+            break;
+        case MAGO:
+            print("MAGO",35, 8, 0x370 );
+            break;
+        case CLERIGO:
+            print("CLERIGO",35, 8, 0x370 );
+            break;
+    }
+
+
+
+    print("eax:",26, 10, 0x070 );
+    print("ebx:",26, 11, 0x070 );
+    print("ecx:",26, 12, 0x070 );
+    print("edx:",26, 13, 0x070 );
+    print("esi:",26, 14, 0x070 );
+    print("edi:",26, 15, 0x070 );
+    print("ebp:",26, 16, 0x070 );
+    print("eip:",26, 17, 0x070 );
+    print("cs:",26, 18, 0x070 );
+    print("ds:",26, 19, 0x070 );
+    print("es:",26, 20, 0x070 );
+    print("gs:",26, 21, 0x070 );
+    print("ss:",26, 22, 0x070 );
+    print("eflags:",23, 23, 0x070 );
+    print("cr0:",26, 24, 0x070 );
+    print("cr1:",26, 25, 0x070 );
+    print("cr2:",26, 26, 0x070 );
+    print("cr3:",26, 27, 0x070 );
+    print("cr4:",26, 28, 0x070 );
+
+    print_hex(eax, 8, 30, 10, 0x070 );
+    print_hex(ebx, 8, 30, 11, 0x070 );
+    print_hex(ecx, 8, 30, 12, 0x070 );
+    print_hex(edx, 8, 30, 13, 0x070 );
+    print_hex(esi, 8, 30, 14, 0x070 );
+    print_hex(edi, 8, 30, 15, 0x070 );
+    print_hex(ebp, 8, 30, 16, 0x070 );
+    print_hex(eip, 8, 30, 17, 0x070 );
+    print_hex(sc, 4, 30, 18, 0x070 );
+    print_hex(ds, 4, 30, 19, 0x070 );
+    print_hex(es, 4, 30, 20, 0x070 );
+    print_hex(gs, 4, 30, 21, 0x070 );
+    print_hex(ss, 4, 30, 22, 0x070 );
+    print_hex(eflags, 8, 30, 23, 0x070 );
+
+    print_hex(l0, 8, 30, 24, 0x70 );
+    print_hex(l1, 8, 30, 25, 0x70 );
+    print_hex(l2, 8, 30, 26, 0x70 );
+    print_hex(l3, 8, 30, 27, 0x70 );
+    print_hex(l4, 8, 30, 28, 0x70 );
+
+
+
+
 
 
 }
