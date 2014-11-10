@@ -374,33 +374,17 @@ errorZombie:
 ;imprimo las cosas modo debug
     popad
 
-    mov dword [AUX],eax
-
-    ; mov eax, cr4
-    ; push eax
-    ; mov eax,cr3
-    ; push eax
-    ; mov eax,cr2
-    ; push eax
-    ; mov eax,cr1
-    ; push eax
-    PUSH 1
-    PUSH 1
-    PUSH 1
-    PUSH 1
-
-    mov eax, [AUX]
-
-    push dword [ebp +12];eflags
+    ;xchg bx, bx
+    push dword [ebp +16];eflags
     push  ss 
     push  gs
     push  fs
     push es
     push ds
     push  cs
-    push dword [ebp+4];eip
-    push  esp
-    push  ebp
+    push dword [ebp+8];eip
+    push dword [ebp+20] ;esp
+    push dword [ebp] ;ebp
     push  edi
     push  esi
     push  edx
