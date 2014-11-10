@@ -149,6 +149,30 @@ Mas adelante veremos como setear las tss de los zombies en este momento será in
 
 \section{Ejercicio 7:}
 
+En este ejercicio se implementa un scheduler simple que a partir de lo devuelto por la función $sched proximo indice()$ (implementada en $sched.c$). Por ahora y dado que no hay otras tareas para correr, este squeduler siempre retornará el valor de la tarea idle, pero mas tarde se agregará la logica para que ademas alterne entre zombies en el caso en que sea necesario.
+
+En este momento del tp, todavía no contamos con la logica para saber donde se encuentra un zombie, como será la logica para mapearlo, quien controlará si esta o no activo asi que decidimos no seguir de manera estricta la guía proporcionada.
+
+\section{Ejercicio 8: El ensamble}
+
+LLegados a este punto tenemos un scheduler, una MMU, 16 TSSs, pero todavía falta implementar toda la logica del juego propiamente dicho. Lo que se determina es que hace falta una estructura que mantenga las coordenadas en las que el zombie se encuentra, para asi facilitar el mapeo y la escritura en la pantalla. Ademas hace falta saber a que tipo pertenece cada zombie lanzado, tanto para poder copiar su codigo de manera efectiva como para poder mostrarlo en pantalla. Hace falta mantener de alguna manera las coordenadas del jugador A y B, los puntajes, la cantidad de zombies disponbiles.
+
+Se determina utilizar $game.c$ para todo ello. Allí se implementará toda la logica del juego, las pociciones de los jugadores, los puntajes, etc. Dado que en $game.c$ posee toda esta información, es logico pensar que tambien aquí se maneje la pantalla ya que existe una correspondecia directa entre ambos.
+
+Se crean funciones para que ambos jugadores puedan moverse por la pantalla ($game_moverJugador()$), cambiar la clase del proximo sombie que será creado ($game_cambiarClase_atras()$ y $game_cambiarClase_adelante()$) y la funcionalidad de lanzar un zombie (ver $game_lanzar_zombi()$). Todas estas funciones estaran mapeadas por interrupciones de teclado a las teclas correspondientes.
+
+Cabe destacar la funcionalidad de $game_lanzar_zombi()$ ya que en esta función sucede una parte critica del juego:
+
+En ella, se buscará primero en una arreglo previamente inicializado, si queda algun zombie "muerto" del jugador que corresponda, o lo que es lo mismo, existe una tarea para el jugador que corresponda que no este siendo utilizada. De ser el caso, se marca en este arreglo que la tarea ha empezaddo a estar "viva" (principalente para que esta no pueda ser desplazada por otra tarea), se inicializan las coordenadas X e Y del tablero para el zombie y en base a ella se calculan las direcciones reales que el zombie ocupará.
+
+Una vez que tenemos las direcciones realies del zombie, se procede a inicializar llamar a la función $mmu_inicializar_zombie$ que como ya hemos dicho, mapea estas pociciones donde corresponde. Asi obtenemos el CR3 del zombie.
+
+Ahora limpiamos su tss, que esta unibocamente ligada al arreglo antes mencionado. Aquí es cuando notamos que no es necesario iniciar antes en $cargarTSS_zombie()$ las tss de antemano.
+
+Luego cargamos el CR3 del zombie en su TSS con $mapearCr3Tss()$ y asi obtenemos una tss limpia para poder empezar a ejecutar el zombie.
+
+Notamos ademas que este arreglo de si los zombies estan muertos o vivos puede resultar muy util para indicarle al scheduler cual tarea correr, asi que se reimplementa el scheduler para que le pregunte a travez de $game_proximo_zombie()$ cual será el proximo zombie a ejecutar.
+
 
 \end{document}
 
