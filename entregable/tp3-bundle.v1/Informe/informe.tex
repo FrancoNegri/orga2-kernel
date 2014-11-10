@@ -75,7 +75,7 @@ En el presente trabajo se describe el desarrolo del Kernel desarrollado para una
 
 El objetivo de este trabajo practico, partiendo de un procesador intel de 32-bits, generar un kernel capaz de gestionar memoria entre diferentes tareas, correrlas de manera concurrente, y resolver las diferentes problematicas que puedan surgir al momento de ejecución.
 
-Para ello utilizaremos las diversas herramientas que intel pone a nuestra disposicion en modo protegido: Usaremos segmentacion y paginación para controlar el privilegio con el que las tareas se ejecutarán.
+Para ello utilizaremos las diversas herramientas que intel pone a nuestra disposicion en modo protegido: Usaremos segmentacion y paginación para controlar el privilegio con el que las tareas se ejecutarán, ademas de limitar lo que las tareas puedan 'ver' con un mapeo parcial de la memoria.
 Utilizaremos interrupciones del procesador que permitirán, tanto reaccionar de manera apropiada cuando se produzca un error en tiempo de ejecución, obtener input del teclado y gestionar un task manager que nos perimita ejecutar tareas de manera concurrente.
 
 En el presente informe, se detallará de manera mas elaborada todo lo hecho para conseguir el objetivo del trabajo práctico, asi como cualquier decisión que se haya tomado en el código a tales fines. Para su mejor entendimiento, este informe se dividirá en ejercicios, que son pequeñas partes del trabajo, y todos juntos conforman al trabajo práctico en si. 
@@ -83,8 +83,7 @@ En el presente informe, se detallará de manera mas elaborada todo lo hecho para
 \clearpage
 
 \section{Ejercicio 1:}
-En esta sección se ha completado la gdt con las primeras 7 posiciones 
-(no se como ponerle que basicamente pusimos basura para que si la usamos, rompa(ALE)). Luego, hemos puesto 4 segmentos, dos para codigo de nivel 0 y 3, y dos para datos de nivel 0 y 3. Para mayor entendimiento del código, se han usado defines, con nombres declarativos(por ejemplo, el segmento destinado a codigo de nivel 0, se llama GDT_IDX_CDE_LVL_0). Estos segmentos direccionan los primeros 623 MB de memoria. Tambien se ha declarado un segmento que describe el area de la pantalla en memoria que puede ser utilizado solo por el kernel. Esto se utilizará al principio para imprimir por pantalla, pero más avanzado el trabajo se necesitarán imprimir muchas cosas, y C provee herramientas más comodas para esto. Dado que la convención C nos pide que todos los segmentos de datos apunten al mismo segmento, este segmento termina quedando en desuso. Después, para pasar a modo protegido, deshabilitamos las interrupciones, habilitamos el A20, cargamos la GDT, seteamos el bit PE del registro CR0 en 1, y luego hacemos un jump far a un segmento válido. Una vez hecho el pasaje, hacemos que todos los segmentos apunten al mismo descriptor(por la convención c) y seteamos la pila del kernel en la posición 0x27000. Finalmente inicializamos en pantalla la interfaz gráfica que tendrá el juego, para lo cual utilizamos el segmento anteriormente mencionado. (aca hay que poner que completamos codigo parapasar a modo protegido y setearl la pila del kernel en 0x27000... lo escribimos directamente??... tambien falta el punto d... es necesario?? no es un ejercicio de transicion que despues no va a tener la menor importancia?? (ALE))
+En para este primer ejercicio, decidimos completar las primeras 7 posiciones de la gdt en un estado claramente invalido, para que, en caso de usarlos erroneamente en algun momento, el error fuera claramente visible. Luego, pusimos 4 segmentos, dos para codigo de nivel 0 y 3, y dos para datos de nivel 0 y 3. Para mayor entendimiento del código, se han usado defines, con nombres declarativos(por ejemplo, el segmento destinado a codigo de nivel 0, se llama GDT_IDX_CDE_LVL_0). Estos segmentos direccionan los primeros 623 MB de memoria. Tambien se ha declarado un segmento que describe el area de la pantalla en memoria que puede ser utilizado solo por el kernel. Esto se utilizará en principio para escribir en el buffer de memoria, pero más avanzado el trabajo será necesario mantener muchas estructuras de datos que deberán ser imprimidas por pantalla, por lo tanto se abandonará este metodo y se pasará a un codigo en C, mas limpio y facil de mantener. Dado que la convención C nos pide que todos los segmentos de datos apunten al mismo segmento, este segmento terminara quedando en desuso y se utilizará para escirbir en pantalla tan solo el segmento de datos de nivel 0. Después, para pasar a modo protegido, deshabilitamos las interrupciones, habilitamos el A20, cargamos la GDT, seteamos el bit PE del registro CR0 en 1 para habilitar modo protegido, y luego hacemos un jump far a un segmento válido para pasar efectivamente a modo protegido. Una vez hecho el pasaje, seteamos todos los segmentos para que apunten al mismo descriptor de segmento (pedido por la convención c) y seteamos la base y puntero de la pila del kernel en la posición 0x27000. Finalmente inicializamos en pantalla la interfaz gráfica que tendrá el juego, para lo cual utilizamos el segmento anteriormente mencionado.
 
 %\input{GDT/gdt.tex}
 
@@ -93,7 +92,8 @@ En esta sección se ha completado la gdt con las primeras 7 posiciones
 \section{Ejercicio 2:} 
 %\input{Interrupciones/int.tex}
 
-En este ejercicio inicializamos la IDT, es decir, completamos las entradas necesarias para asociar diferentes rutinas a todas las excepciones del procesador. En principio, cada una de estas rutinas mostrará por pantalla qué tipo de problema se produjo e interrumpirá la ejecución. Luego de inicializada la IDT, deberemos cargarla desde el kernel. Posteriormente se modicarán estas rutinas para que se continue la ejecución, resolviendo el problema y desalojando a la tarea que lo produjo.
+En este ejercicio inicializamos la IDT, es decir, completamos las entradas necesarias para asociar diferentes rutinas a todas las excepciones del procesador. En principio, cada una de estas rutinas mostrará por pantalla qué tipo de problema se produjo e interrumpirá la ejecución. Luego de inicializada la IDT, deberemos cargarla desde el kernel. Posteriormente se modicarán estas rutinas para que en caso de que sea una tarea de nivel 3 se resuelva el problema y se desaloje a la tarea que lo produjo.
+En caso de producirse un error de kernel, se mostrará a que tipo pertenece y en caso de tener, su code error.
 
 
 \clearpage
@@ -101,26 +101,49 @@ En este ejercicio inicializamos la IDT, es decir, completamos las entradas neces
 \section{Ejercicio 3:}
 %\input{MMU/mmu.tex}
 
-Inicializamos el directorio de páginas del kernel y las tablas de páginas necesarias para mapear las direcciones 0x00000000 a 0x003FFFFF usando identity mapping. El directorio de páginas se inicializará en la dirección 0x27000 y las tablas de páginas a partir de la dirección 0x28000. En este paso, nos hemos construido una función, llamada pedirPag, que dada una dirección de memoria te inicializa una página en esa dirección con todas sus entradas en cero, salvo el bit de read/write. Esta función es aquí utilizada sólo para crear el directorio de páginas y avanzados en el trabajo la reutilizaremos. Finalmente seteamos en 1 el bit correspondiente del registro CR0 para habilitar la paginación.
+Inicializamos el directorio de páginas del kernel y las tablas de páginas necesarias para mapear las direcciones 0x00000000 a 0x003FFFFF usando identity mapping para ello usamos un pequeño codigo en asambler que puede verse en $paging.asm$. En principio esta función era sufiente para el simple mapeo que requeriamos. Mas adelante se optará por inicializar los page directories y page tables de una manera mas clara y limpia utilizando $mmu.c$. El directorio de páginas se inicializará en la dirección $0x27000$ y las tablas de páginas a partir de la dirección $0x28000$. En este paso, se implementa una función llamada pedirPag, que dada la dirección de una pagina, la inicializa con todas sus entradas en cero, poniendo exclusivo cuidado en setear en todas sus entradas el bit "not present" de manera que no sea utilizada hasta que se determine una direccion apropiada para la misma. 
+Luego de armado el directorio de pagias del kernel, seteamos el CR3 para que apunte al page directory y seteamos en 1 el bit correspondiente del registro CR0 para habilitar la paginación.
 
 \clearpage
 
 \section{Ejercicio 4:}
 %\input{Paginacion/pag.tex}
 
-Aquí inicializamos la MMU (Memory Management Unit), en este caso una variable dirGlobal la cual siempre apuntará a una dirección física libre de memoria que será utilizada para pedir una nueva página, y un contador de páginas para llevar el control del espacio que ocupamos con las páginas pedidas y así darnos cuenta si nos salirnos de nuestra area de memoria libre. Luego construimos una función para inicializar zombies que recibe como parámetros el código de la tarea y un arreglo de direcciones físicas(éste contiene como primer elemento a la posición en el mapa donde estamos inicializando el zombie, y en el resto del arreglo las 8 posiciones del mapa contiguas). En esta función creamos un nuevo directorio de páginas y una tabla de páginas para la tarea zombie y vinculamos la tabla de páginas del kernel a la primera entrada del directorio de páginas de la tarea zombie. Después, mapeamos cada dirección del arreglo a partir de la dirección virtual 0x8000000. Finalmente debemos mapear la dirección física del mapa donde estamos inicializando el zombie para poder copiar su código, y luego la desmapeamos.
+Aquí implementamos la Memory Managment Unit dentro de $mmu.c$, para ello, primero la inicializamos seteando una variable "dirGlobal" la cual siempre apuntará a una dirección física libre de memoria que será utilizada para alojar una page table o page directory segun corresponda.
+
+Luego construimos una función para inicializar zombies ($mmu_inicializar_zombie$) que recibe como parámetros el código de la tarea y un arreglo de direcciones físicas(éste contiene como primer elemento a la posición en el mapa donde estamos inicializando el zombie, y en el resto del arreglo las 8 posiciones del mapa contiguas). En esta función creamos un nuevo directorio de páginas y una tabla de páginas para la tarea zombie y vinculamos la tabla de páginas del kernel a la primera entrada del directorio de páginas de la tarea zombie. Después, mapeamos cada dirección del arreglo a partir de la dirección virtual 0x8000000. 
+Dado que el area del mapa donde se ejecutarán los zombies no es alcanzable desde el kernel deberemos mapear la dirección física donde se encontrará el zombie en alguna direccion virtual que no utilicemos de manera tal que podamos copiar su codigo a esta dirección, y una vez copiado el codigo, desmapearlo.
+
+Para eso, agregamos al page directory actual una nueva page table, mapeamos en ella una direccion que no se use (en este caso se decidió $0xDC4000$), copiamos el codigo, y desligamos la page table del page directory.
+
+Para todo este proceso se implementarán varias funciones que facilitarán la tarea de mapear y desmapear page tables a direcciones reales y page directories a page tables, que mas adelante cuando sea necesario remapear zombies, resultarán de suma utilidad.
 
 \clearpage
 
 \section{Ejercicio 5:}
 %\input{Scheduler/scheduler.tex}
 
-Completamos las entradas necesarias en la IDT para asociar las rutinas correspondientes a las interrupciones del teclado, reloj y la interrupción de sofware 0x66. Posteriormente se escribirán dichas rutinas, la del reloj que será utilizada para actualizar la pantalla y cambiar de tarea en cada tick del reloj, la del teclado que será utilizada para que las distintas teclas que se usan en el juego cumplan con la función que deben realizar y finalmente la interrupción 0x66 que se utilizará para el movimiento de las tareas zombies.
+Completamos las entradas necesarias en la IDT para asociar las rutinas correspondientes a las interrupciones del teclado, reloj y la interrupción de sofware 0x66. De momento estas funciónes no tendrán mayor utilidad, el teclado solo mostrará un mensaje por pantalla al precionarse una telca y el reloj solo actualizará un reloj en la parte inferior derecha de la pantalla.
+
+De momento la interrupción 0x66 no realizará ninguna acción, se hablará de como fue implementada mas adelante en el tp.
+
+Posteriormente se reescribirán dichas rutinas para que, la del reloj sea utilizada para actualizar la pantalla y llamar al skeduler y cambiar a la tarea adecuada en cada tick del reloj, la del teclado que será utilizada para que las distintas teclas respondan a la función asignada y finalmente la interrupción 0x66 que se utilizará para el movimiento de las tareas zombies.
 
 \clearpage
 
 \section{Ejercicio 6:}
 
+En este ejercicio se implementará principalmente el archivo $tss.c$ el cual se encargará de administrar de manera apropiada todo lo que tenga que ver con el seteo apropiado de las tss a ser utilizadas.
+
+En principio se crea una entrada vacía que será donde guardemos la tss del kernel en el momento en que este deje de ser de utilidad.
+
+Como segundo paso se setea de manera apropiada las variables de la tarea idle en $inicializarTareaIdle()$.
+
+Luego se implementará una función $cargarTSS_zombie()$ que se encarge de inicializar 16 entradas en la gdt que corresponderán a cada uno de los zombies que pueden estar activos en el tablero. Esta función primero setea las entradas de la gdt para que apunten unibocamente a un tss a ser utilizada por un zombie y luego se setea la tss correspondiente tambien en estado valido para que queden listas para ser utilizadas por una tarea de nivel 3, lo unico que quedará sin setear será el CR3 de las tss, eso, se determina, será agregado en el momento en que $mmu_inicializar_zombie$ nos dé un CR3 valido.
+
+Ademas, para simplificar las cosas, se tomará como que las primeras 8 tss son de los zombies del jugador A y las siguientes 8 entradas son del jugador B. De esa manera con tan solo tener el indice de que tss se está corriendo, podremos ademas determinar a que jugador pertenece.
+
+Mas adelante veremos como setear las tss de los zombies en este momento será inecesario para la implementación final, por lo que esta funcionalidad será quitada de esta función y se moverá a otro lado.
 
 \clearpage
 
