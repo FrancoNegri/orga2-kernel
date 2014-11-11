@@ -160,11 +160,13 @@ Luego cargamos el CR3 del zombie en su TSS con $mapearCr3Tss()$ y así obtenemos
 
 Este es el esquema grafico para ver como funcióna todo el sistema en conjunto:
 
-\begin{figure}[h!]
-  \begin{center}
-\includegraphics[scale=0.3]{dibujos/dibujo1.jpg}\\
-  \end{center}
-\end{figure}
+
+%\begin{figure}[h!]
+%  \begin{center}
+\includegraphics[scale=0.2]{dibujos/dibujo1.jpg}\\
+%  \end{center}
+%\end{figure}
+\newpage
 
 Notamos además que este arreglo de si los zombies están muertos o vivos puede resultar muy útil para indicarle al scheduler cuál tarea correr, así que se reimplementa el scheduler para que le pregunte a través de $game\_ proximo\_ zombie()$ cuál será el proximo zombie a ejecutar.
 
@@ -172,13 +174,15 @@ Para encapsular todo el comportamiento de escribir en el bufer de video y hacer 
 
 Dada que esta función se debe ejecutar de manera periodica, se decide llamar a esta función desde la int $32$ para que con cada tic de clock del procesador se actualice la pantalla, aunque el framrate sería facilmente ajustable haciendo que en vez de llamarse con cada tic se llame cada $2, 4$ o lo que se decida.(Nota: nuestro juego corre a mas de 60 FPS, TAKE THAT PS4).
 
-En el siguiente esquema se muestra de manera general como funcionará la int $32$
+En el siguiente esquema se muestra de manera general como funcionará la int $32$:
 
-\begin{figure}[h!]
-  \begin{center}
-\includegraphics[scale=0.3]{dibujos/dibujo2.jpg}\\
-  \end{center}
-\end{figure}
+
+%\begin{figure}[h!]
+%  \begin{center}
+\includegraphics[scale=0.2]{dibujos/dibujo2.jpg}\\
+%  \end{center}
+%\end{figure}
+\newpage
 
 
 Llegados a este punto ya es posible lanzar zombies al campo de juego, intercambiar sus tareas para que corran concurrentemente y ejecutarlos debidamente. Por supuesto, como la int $0x66$ todavía no tiene ninguna funcionalidad, el zombie permanece en su lugar.
@@ -189,11 +193,13 @@ Ademas, se aprovecha $game\_move\_current_zombi()$ para que chequee las pocicion
 
 El esquema de este funcionamiento es:
 
-\begin{figure}[h!]
-  \begin{center}
-\includegraphics[scale=0.3]{dibujos/dibujo3.jpg}\\
-  \end{center}
-\end{figure}
+
+%\begin{figure}[h!]
+%  \begin{center}
+\includegraphics[scale=0.57]{dibujos/dibujo3.jpg}\\
+%  \end{center}
+%\end{figure}
+\newpage
 
 Muy bien, ya casi terminamos!. Ahora vemos como los zombies corren libres por el tablero de juego, cada uno con sus correspondientes paginas siendo remapeadas cada vez que llaman a la int $0x66$. Sin embargo el zombie mago entregado por la catedra, produce una general protection que al no ser manejada de la manera debida, detiene el juego.
 
@@ -202,10 +208,6 @@ Se decide implementar en C una nueva función que será llamada por todas las in
 Luego de ser manejada la interrupción se vuelve a saltar a la tarea idle y se continúa con la ejecución normal.
 
 Solo queda implementar el modo debug, para eso simplemente se decide implementar una interrupción de teclado para la tecla Y que ponga una dword en 1 en caso de que sea precionada. Luego, al llamarse a una interrupción, se llama a una función en C que imprime todo lo necesario por pantalla y luego se queda haciendo pooling del teclado hasta que la tecla Y sea precionada nuevamente.
-
-Se procede a hacer un simple esquema de las partes criticas del sistema funcionando en conjunto:
-
-==DIBUJITOS==
 
 \end{document}
 
