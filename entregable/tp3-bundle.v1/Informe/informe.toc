@@ -6,5 +6,5 @@
 \contentsline {section}{\numberline {5}Ejercicio 4: Memory Management Unit}{4}
 \contentsline {section}{\numberline {6}Ejercicio 5: Interrupciones De Teclado/Reloj}{4}
 \contentsline {section}{\numberline {7}Ejercicio 6: TSS}{4}
-\contentsline {section}{\numberline {8}Ejercicio 7: Scheduler}{5}
-\contentsline {section}{\numberline {9}Ejercicio 8: El ensamble Final}{5}
+\contentsline {section}{\numberline {8}Ejercicio 7: Scheduler}{7}
+\contentsline {section}{\numberline {9}Ejercicio 8: El ensamble Final}{7}

@@ -134,6 +134,10 @@ Además, para simplificar las cosas, se tomará como que las primeras 8 tss son 
 
 Más adelante se determinará que es mas facil para la implementación elegida, setear la TSS en el momento en que se crea el zombie, por lo que iniciar una nueva tss se convertirá en una función aparte.
 
+Aquí se puede ver la estructura final de nuestra GDT:
+
+\includegraphics[scale=0.7]{dibujos/dibujo4.jpg}\\
+
 \section{Ejercicio 7: Scheduler}
 
 En este ejercicio se implementa un scheduler simple que a partir de lo devuelto por la función $sched\_ proximo\_ indice()$ (implementada en $sched.c$). Por ahora y dado que no hay otras tareas para correr, este scheduler siempre retornará el valor de la tarea idle, pero más tarde se agregará la lógica para que además alterne entre zombies en el caso en que sea necesario.
@@ -179,7 +183,7 @@ En el siguiente esquema se muestra de manera general como funcionará la int $32
 
 %\begin{figure}[h!]
 %  \begin{center}
-\includegraphics[scale=0.2]{dibujos/dibujo2.jpg}\\
+\includegraphics[scale=0.5]{dibujos/dibujo2.jpg}\\
 %  \end{center}
 %\end{figure}
 \newpage
@@ -196,7 +200,7 @@ El esquema de este funcionamiento es:
 
 %\begin{figure}[h!]
 %  \begin{center}
-\includegraphics[scale=0.57]{dibujos/dibujo3.jpg}\\
+\includegraphics[scale=0.7]{dibujos/dibujo3.jpg}\\
 %  \end{center}
 %\end{figure}
 \newpage

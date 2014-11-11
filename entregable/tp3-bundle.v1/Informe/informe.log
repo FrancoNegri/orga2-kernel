@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.8.28)  11 NOV 2014 16:13
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.8.28)  11 NOV 2014 16:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -488,74 +488,99 @@ Overfull \hbox (13.93787pt too wide) in paragraph at lines 129--130
 m/n/10 ()$\OT1/bch/m/n/10 . 
  []
 
+<dibujos/dibujo4.jpg, id=23, 1702.36pt x 2341.74875pt>
+File: dibujos/dibujo4.jpg Graphic file (type jpg)
 
-Overfull \hbox (6.4003pt too wide) in paragraph at lines 149--150
+<use dibujos/dibujo4.jpg>
+Package pdftex.def Info: dibujos/dibujo4.jpg used on input line 139.
+(pdftex.def)             Requested size: 1191.64389pt x 1639.21298pt.
+
+Overfull \hbox (751.39981pt too wide) in paragraph at lines 139--140
+[][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 139--140
+
+ []
+
+LaTeX Info: Redefining \. on input line 140.
+LaTeX Info: Redefining \% on input line 140.
+[5]
+Overfull \vbox (927.89409pt too high) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 140.
+LaTeX Info: Redefining \% on input line 140.
+
+[6 <./dibujos/dibujo4.jpg>]
+Overfull \hbox (6.4003pt too wide) in paragraph at lines 153--154
 []\OT1/bch/m/n/10 Se crean fun-cio-nes pa-ra que am-bos ju-ga-do-res pue-dan mo
 -ver-se por la pan-ta-lla ($\OML/cmm/m/it/10 game[]moverJugador\OT1/cmr/m/n/10 
 ()$\OT1/bch/m/n/10 ),
  []
 
 
-Overfull \hbox (52.7623pt too wide) in paragraph at lines 149--150
+Overfull \hbox (52.7623pt too wide) in paragraph at lines 153--154
 \OT1/bch/m/n/10 cam-biar la cla-se del pr[]oxi-mo zom-bie que ser[]a crea-do ($
 \OML/cmm/m/it/10 game[]cambiarClase[]atras\OT1/cmr/m/n/10 ()$ \OT1/bch/m/n/10 y
  $\OML/cmm/m/it/10 game[]cambiarClase[]adelante\OT1/cmr/m/n/10 ()$\OT1/bch/m/n/
 10 )
  []
 
-LaTeX Info: Redefining \. on input line 158.
-LaTeX Info: Redefining \% on input line 158.
-[5] <dibujos/dibujo1.jpg, id=26, 1702.36pt x 2341.74875pt>
+<dibujos/dibujo1.jpg, id=30, 1702.36pt x 2341.74875pt>
 File: dibujos/dibujo1.jpg Graphic file (type jpg)
 
 <use dibujos/dibujo1.jpg>
-Package pdftex.def Info: dibujos/dibujo1.jpg used on input line 166.
+Package pdftex.def Info: dibujos/dibujo1.jpg used on input line 170.
 (pdftex.def)             Requested size: 340.46597pt x 468.34146pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 166--169
+Underfull \hbox (badness 10000) in paragraph at lines 170--173
 
  []
 
-LaTeX Info: Redefining \. on input line 169.
-LaTeX Info: Redefining \% on input line 169.
-[6 <./dibujos/dibujo1.jpg>]
-<dibujos/dibujo2.jpg, id=30, 1702.36pt x 2341.74875pt>
+LaTeX Info: Redefining \. on input line 173.
+LaTeX Info: Redefining \% on input line 173.
+[7]
+LaTeX Info: Redefining \. on input line 173.
+LaTeX Info: Redefining \% on input line 173.
+ [8 <./dibujos/dibujo1.jpg>]
+<dibujos/dibujo2.jpg, id=38, 552.50415pt x 435.0654pt>
 File: dibujos/dibujo2.jpg Graphic file (type jpg)
 
 <use dibujos/dibujo2.jpg>
-Package pdftex.def Info: dibujos/dibujo2.jpg used on input line 182.
-(pdftex.def)             Requested size: 340.46597pt x 468.34146pt.
+Package pdftex.def Info: dibujos/dibujo2.jpg used on input line 186.
+(pdftex.def)             Requested size: 276.25139pt x 217.53215pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 182--185
+Underfull \hbox (badness 10000) in paragraph at lines 186--189
 
  []
 
-LaTeX Info: Redefining \. on input line 185.
-LaTeX Info: Redefining \% on input line 185.
-[7 <./dibujos/dibujo2.jpg>]
-<dibujos/dibujo3.jpg, id=35, 586.8324pt x 832.5504pt>
+LaTeX Info: Redefining \. on input line 189.
+LaTeX Info: Redefining \% on input line 189.
+[9 <./dibujos/dibujo2.jpg>]
+<dibujos/dibujo3.jpg, id=42, 522.5121pt x 282.21436pt>
 File: dibujos/dibujo3.jpg Graphic file (type jpg)
 
 <use dibujos/dibujo3.jpg>
-Package pdftex.def Info: dibujos/dibujo3.jpg used on input line 199.
-(pdftex.def)             Requested size: 334.49794pt x 474.55865pt.
+Package pdftex.def Info: dibujos/dibujo3.jpg used on input line 203.
+(pdftex.def)             Requested size: 365.75597pt x 197.54869pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 199--202
+Underfull \hbox (badness 10000) in paragraph at lines 203--206
 
  []
 
-LaTeX Info: Redefining \. on input line 202.
-LaTeX Info: Redefining \% on input line 202.
-[8 <./dibujos/dibujo3.jpg>]
-Overfull \hbox (62.74602pt too wide) in paragraph at lines 206--207
+LaTeX Info: Redefining \. on input line 206.
+LaTeX Info: Redefining \% on input line 206.
+[10 <./dibujos/dibujo3.jpg>]
+Overfull \hbox (62.74602pt too wide) in paragraph at lines 210--211
 []\OT1/bch/m/n/10 Se de-ci-de im-ple-men-tar en C una nue-va fun-ci[]on que ser
 []a lla-ma-da por to-das las in-te-rrup-ci[]ones $\OML/cmm/m/it/10 game[]error[
 ]handling\OT1/cmr/m/n/10 ()$
  []
 
-LaTeX Info: Redefining \. on input line 212.
-LaTeX Info: Redefining \% on input line 212.
-[9] (./informe.aux
+LaTeX Info: Redefining \. on input line 216.
+LaTeX Info: Redefining \% on input line 216.
+[11] (./informe.aux
 LaTeX Info: Redefining \. on input line 7.
 LaTeX Info: Redefining \% on input line 7.
 )
@@ -564,10 +589,10 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 3096 strings out of 493304
- 41032 string characters out of 6139871
+ 3101 strings out of 493304
+ 41138 string characters out of 6139871
  115262 words of memory out of 5000000
- 6484 multiletter control sequences out of 15000+600000
+ 6488 multiletter control sequences out of 15000+600000
  21286 words of font info for 35 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  38i,13n,43p,1856b,366s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -579,10 +604,10 @@ e1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
 ic/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsf
 onts/cm/cmss10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmtt10.pfb>
-Output written on informe.pdf (9 pages, 3730392 bytes).
+Output written on informe.pdf (11 pages, 3873959 bytes).
 PDF statistics:
- 68 PDF objects out of 1000 (max. 8388607)
- 44 compressed objects within 1 object stream
+ 75 PDF objects out of 1000 (max. 8388607)
+ 48 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 26 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 31 words of extra memory for PDF output out of 10000 (max. 10000000)
 
