@@ -40,7 +40,7 @@
 #define PAGINAS_LIBRES_MMU		0x100000 //500 paginas disponibles (hacia arriba)
 #define CACHE_VIDEO				0x300000 // lo uso para posicionar todo adecuadamente antes de ponerlo en pantalla
 #define CACHE_TAREA				0x301000
-#define PAGINAS_LIBRES_TSS		0x400000 // 254 paginas disponibles (hacia abajo)
+#define PAGINAS_LIBRES_TSS		0x3F0000 // 254 paginas disponibles (hacia abajo)
 
 
 #define LIMITE_PAGINAS_LIBRES_MMU 256*2

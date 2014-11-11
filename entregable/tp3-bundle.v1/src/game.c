@@ -40,7 +40,7 @@ void mapearZombie(int jugador, int coordenadaX, int coordenadaY, void **direccio
 #define JUGADORA 1
 #define JUGADORB 0
 
-#define CANTIDAD_DE_ZOMBIES_TOTAL 9
+#define CANTIDAD_DE_ZOMBIES_TOTAL 20
 
 int coordenadaJugadorY[CANTIDAD_DE_JUGADORES];
 
@@ -55,7 +55,7 @@ int clockZombie[CANTIDAD_DE_JUGADORES][CANT_ZOMBIS];
 
 char clockZ[] = {'x', '/', '|', '\\', '-', '/', '|', '\\', '-'};
 
-int puntaje[CANTIDAD_DE_JUGADORES];
+unsigned int puntaje[CANTIDAD_DE_JUGADORES];
 
 int cantidadDeZombiesDisponibles[CANTIDAD_DE_JUGADORES];
 
@@ -64,8 +64,11 @@ short int matrizDelTerreno[SIZE_H][SIZE_W];
 int DEBUGMODE;
 //graficos del juego
 
+char* mensaje;
+
 void game_inicializarMapa()
 {
+    mensaje = "Ready? Fight!";
     int i,j;
     for(j = 0; j < CANTIDAD_DE_JUGADORES; j++)
     {
@@ -93,6 +96,7 @@ void game_inicializarMapa()
     game_actualizarFrame();
     return;
 }
+
 
 
 //esta función imprime tooooooodo el mapa
@@ -179,11 +183,22 @@ void game_actualizarFrame()
     	}
     }
 
-    pixel[47][35] = puntaje[JUGADORA] + 0x0730 + 0x3900;
-    pixel[47][45] = puntaje[JUGADORB] + 0x0730 + 0x2900;
+    //pixel[47][35] = puntaje[JUGADORA] + 30 + 00;
+    //pixel[47][45] = puntaje[JUGADORB] + 0x0730 + 0x2900;
+    
 
-    pixel[47][30] = cantidadDeZombiesDisponibles[JUGADORA] + 0x0730;
-    pixel[47][51] = cantidadDeZombiesDisponibles[JUGADORB] + 0x0730;
+    // pixel[47][30] = cantidadDeZombiesDisponibles[JUGADORA] + 0x0730;
+    // pixel[47][51] = cantidadDeZombiesDisponibles[JUGADORB] + 0x0730;
+
+    //se cambia el print_hex y print para que escriban a mi buffer de video provisorio en vez de al buffer
+    print_hex(puntaje[JUGADORA],2,35 ,47 , 0x07 + 0x39 );
+    print_hex(puntaje[JUGADORB],2,45 ,47 , 0x07 + 0x29 );
+
+    print_hex(cantidadDeZombiesDisponibles[JUGADORA],2, 30 ,47 , 0x07 );
+    print_hex(cantidadDeZombiesDisponibles[JUGADORB],2, 51 ,47 , 0x07 );
+
+    //print(const char * text, unsigned int x, unsigned int y, unsigned short attr)
+    print(mensaje,35 , 43 , 0xA4);
 
     //ahora que tengo actualizado todo, lo paso a la pantalla
     //(me evito el parpadeo fantasma)
@@ -196,7 +211,10 @@ void game_actualizarFrame()
     }
 
 
+
 }
+
+
 
 int game_zombieEnEstadoValido(short int coordenadaZombieX, short int coordenadaZombieY)
 {
@@ -406,11 +424,26 @@ void game_move_current_zombi(direccion dir)
         puntaje[JUGADORA]++;
         coordenadaZombieX[jugador][numeroDeZombie] = -1;
         coordenadaZombieY[jugador][numeroDeZombie] = -1;
-        if(jugador == JUGADORA)
-            tss_limpar_tss(&tss_zombisA[numeroDeZombie]);
-        if(jugador == JUGADORB)
-            tss_limpar_tss(&tss_zombisB[numeroDeZombie]);
+        // if(jugador == JUGADORA)
+        //     tss_limpar_tss(&tss_zombisA[numeroDeZombie]);
+        // if(jugador == JUGADORB)
+        //     tss_limpar_tss(&tss_zombisB[numeroDeZombie]);
         //limpiar tss
+
+        //boluedecces
+        if(puntaje[JUGADORA] == 1 && puntaje[JUGADORB] == 0)
+            mensaje = "First Blood!";
+        else
+            if(puntaje[JUGADORA] + 4 > puntaje[JUGADORB])
+                mensaje = "THIS IS ZOMBIELAND!";
+            else
+                if(puntaje[JUGADORA] + 2 > puntaje[JUGADORB])
+                    mensaje = "WAR... WAR NEVER CHANGEEEEEEEES!";
+                else
+                    mensaje = "A is dominating!";
+
+        //boludeces
+
         return;
     }
     if(coordenadaZombieX[jugador][numeroDeZombie] < 2)
@@ -419,11 +452,23 @@ void game_move_current_zombi(direccion dir)
         puntaje[JUGADORB]++;
         coordenadaZombieX[jugador][numeroDeZombie] = -1;
         coordenadaZombieY[jugador][numeroDeZombie] = -1;
-
-        tss_limpar_tss(&tss_zombisB[numeroDeZombie]);
+        
+        // tss_limpar_tss(&tss_zombisB[numeroDeZombie]);
         //limbiar tss
-        tlbflush();
+        //tlbflush();
 
+        //boludeces
+        if(puntaje[JUGADORA] == 0 && puntaje[JUGADORB] == 1)
+            mensaje = "Go go zombi defense force!";
+        else
+            if(puntaje[JUGADORA]  < puntaje[JUGADORB] + 3)
+                mensaje = "FINISH HIM!";
+            else
+                if(puntaje[JUGADORA]  < puntaje[JUGADORB] + 2)
+                    mensaje = "OVERKILLLLLLLLLLLL!";
+                else
+                    mensaje = "B is dominating!";
+        //boludeces
         return;
     }
     if(coordenadaZombieY[jugador][numeroDeZombie] < 0)
@@ -521,7 +566,6 @@ int game_error_handling()
         coordenadaZombieY[jugador][numeroDeZombie] = -1;
         coordenadaZombieX[jugador][numeroDeZombie] = -1;
 
-
         return 0;
     }
 
@@ -554,12 +598,11 @@ void game_imprimir_stack(unsigned int eax,unsigned int ebx,unsigned int ecx,unsi
 
 
 
-    for( i = 5 ; i < 30; i++ ) //para pantalla completa es 50
+    for( i = 5 ; i < 30; i++ ) //inicio un cacho en girs en mi buffer previo
     {
         for(j=20; j< 60;j++)
         {
             pixel[i][j] = 0x07000;
-            bufferDeVideo[i][j] = pixel[i][j];
         }
     }
 
@@ -607,7 +650,7 @@ void game_imprimir_stack(unsigned int eax,unsigned int ebx,unsigned int ecx,unsi
     print("ss:",26, 23, 0x070 );
     print("eflags:",23, 24, 0x070 );
     print("cr0:",26, 25, 0x070 );
-    //print("cr1:",26, 25, 0x070 );
+    //print("cr1:",26, 25, 0x070 ); no existe =(
     print("cr2:",26, 26, 0x070 );
     print("cr3:",26, 27, 0x070 );
     print("cr4:",26, 28, 0x070 );
@@ -634,9 +677,13 @@ void game_imprimir_stack(unsigned int eax,unsigned int ebx,unsigned int ecx,unsi
     print_hex(l3, 8, 30, 27, 0x70 );
     print_hex(l4, 8, 30, 28, 0x70 );
 
-
-
-
+    for( i = 5 ; i < 30; i++ ) //Escibo en la pantalla posta
+    {
+        for(j=20; j< 60;j++)
+        {
+            bufferDeVideo[i][j] = pixel[i][j];
+        }
+    }
 
 
 }

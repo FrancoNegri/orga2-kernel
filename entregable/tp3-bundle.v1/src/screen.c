@@ -8,7 +8,7 @@
 #include "screen.h"
 
 void print(const char * text, unsigned int x, unsigned int y, unsigned short attr) {
-    ca (*p)[VIDEO_COLS] = (ca (*)[VIDEO_COLS]) VIDEO;
+    ca (*p)[VIDEO_COLS] = (ca (*)[VIDEO_COLS]) CACHE_VIDEO;
     int i;
     for (i = 0; text[i] != 0; i++) {
         p[y][x].c = (unsigned char) text[i];
@@ -22,7 +22,7 @@ void print(const char * text, unsigned int x, unsigned int y, unsigned short att
 }
 
 void print_hex(unsigned int numero, int size, unsigned int x, unsigned int y, unsigned short attr) {
-    ca (*p)[VIDEO_COLS] = (ca (*)[VIDEO_COLS]) VIDEO; // magia
+    ca (*p)[VIDEO_COLS] = (ca (*)[VIDEO_COLS]) CACHE_VIDEO; // magia
     int i;
     char hexa[8];
     char letras[16] = "0123456789ABCDEF";

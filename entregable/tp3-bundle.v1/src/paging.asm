@@ -35,11 +35,11 @@ page_init:
 
 ;global editarGDT
 
-editarGDT:
-    ret
+; editarGDT:
+;     ret
 
 
-global stop
-stop:
-    xchg bx, bx
-    ret  
+; global stop
+; stop:
+;     xchg bx, bx
+;     ret  

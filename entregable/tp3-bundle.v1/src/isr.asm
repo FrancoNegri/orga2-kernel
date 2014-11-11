@@ -455,14 +455,6 @@ _isr32:
 ;; Rutina de atención del TECLADO
 ;; -------------------------------------------------------------------------- ;;
 
-
-
-
-
-coordenadaX dd 40
-coordenadaY dd 25
-
-
 global _isr33
 _isr33:
     pushad

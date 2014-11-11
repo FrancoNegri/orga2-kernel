@@ -1,55 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;Funciones Del Kernel;;;;;;;;;;;;;;;;;;
-;void actualizarPantalla()
-actualizarPantalla:
-
-    push ebp
-    mov ebp, esp
-    pushad
-
-    xor eax, eax ; fila
-    xor esi, esi ; col
-    mov ecx, 0xB8000; putero
-
-
-    xor edi, edi
-    xor ebx, ebx
-    xor edx, edx
-
-    mov di, 0x2000 ;caracter nulo(00), fondo verde (A0)
-    mov dx, 0x3000 ;caracter nulo(00), fondo rojo (C0)
-    mov bx, 0x4000 ;caracter nulo(00), fondo azul horrible (B0)
-    ;xchg bx,bx
-
-newLine:
-    mov [gs:ecx], bx
-    add ecx, 2
-    inc eax
-init:
-    mov [gs:ecx], di
-
-    add ecx, 2
-    inc eax
-    cmp eax, 79
-    jnz init
-
-    mov [gs:ecx], dx
-    add ecx, 2
-
-    xor eax, eax
-    inc esi
-    cmp esi, 50
-    jnz newLine
-
-    mov dword [lineaApuntada], 1
-
-    popad
-    pop ebp
-    ret
 
 lineaApuntada dd 1
-
 ;void print(string* str)
-
 print:
     push ebp
     mov ebp, esp
@@ -95,3 +47,55 @@ print:
     popad
     pop ebp
     ret
+
+;deprecated
+
+;void actualizarPantalla()
+; actualizarPantalla:
+
+;     push ebp
+;     mov ebp, esp
+;     pushad
+
+;     xor eax, eax ; fila
+;     xor esi, esi ; col
+;     mov ecx, 0xB8000; putero
+
+
+;     xor edi, edi
+;     xor ebx, ebx
+;     xor edx, edx
+
+;     mov di, 0x2000 ;caracter nulo(00), fondo verde (A0)
+;     mov dx, 0x3000 ;caracter nulo(00), fondo rojo (C0)
+;     mov bx, 0x4000 ;caracter nulo(00), fondo azul horrible (B0)
+;     ;xchg bx,bx
+
+; newLine:
+;     mov [gs:ecx], bx
+;     add ecx, 2
+;     inc eax
+; init:
+;     mov [gs:ecx], di
+
+;     add ecx, 2
+;     inc eax
+;     cmp eax, 79
+;     jnz init
+
+;     mov [gs:ecx], dx
+;     add ecx, 2
+
+;     xor eax, eax
+;     inc esi
+;     cmp esi, 50
+;     jnz newLine
+
+;     mov dword [lineaApuntada], 1
+
+;     popad
+;     pop ebp
+;     ret
+
+
+
