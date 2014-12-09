@@ -121,7 +121,7 @@ taskBC.tsko: tareaBC.c
 tasks: $(TASKSBINS)
 	@echo 'Generando imagen de las tareas...'
 	$(QUIET) dd if=/dev/zero bs=1 count=$(TASKSSIZE) of=$(TASKS)  status=noxfer > /dev/null 2>&1
-	$(QUIET) dd if=$(TASKAG)   bs=1 count=4K of=$(TASKS) seek=0K  status=noxfer > /dev/null 2>&1
+	$(QUIET) dd if=$(TASKAM)   bs=1 count=4K of=$(TASKS) seek=0K  status=noxfer > /dev/null 2>&1
 	$(QUIET) dd if=$(TASKAM)   bs=1 count=4K of=$(TASKS) seek=4K  status=noxfer > /dev/null 2>&1
 	$(QUIET) dd if=$(TASKAC)   bs=1 count=4K of=$(TASKS) seek=8K  status=noxfer > /dev/null 2>&1
 	$(QUIET) dd if=$(TASKBG)   bs=1 count=4K of=$(TASKS) seek=12K status=noxfer > /dev/null 2>&1

@@ -47,8 +47,8 @@
 \thispagestyle{empty}
 \materia{Organización del Computador II}
 \submateria{Segundo Cuatrimestre de 2014}
-\titulo{Trabajo Práctico III}
-\subtitulo{El Kernel contraataca}
+\titulo{Trabajo Práctico II}
+\subtitulo{subtitulo del trabajo}
 \integrante{Alejandro Mignanelli}{609/11}{minga_titere@hotmail.com}
 \integrante{Franco Negri}{893/13}{franconegri2004@hotmail.com}
 \integrante{Federico Suárez}{610/11}{elgeniofederico@gmail.com}
@@ -59,7 +59,11 @@
 \thispagestyle{empty}
 \vfill
 \begin{abstract}
-En el presente trabajo se describe el desarrollo del Kernel para una arquitectura intel de 32-bits, así como el manejo de paginación, manejo de tareas, interrupciones y todo lo referente al manejo de un pequeño sistema operativo.
+En el presente trabajo se describe la problemática de procesar información de manera eficiente cuando los mismos requieren:
+\begin{enumerate}
+\item Transferir grandes volumenes de datos.
+\item Realizar las mismas instrucciones sobre un set de datos importante.
+\end{enumerate}
 
 \end{abstract}
 
@@ -73,145 +77,280 @@ En el presente trabajo se describe el desarrollo del Kernel para una arquitectur
 
 \section{Objetivos generales}
 
-El objetivo de este trabajo práctico es, partiendo de un procesador intel de 32-bits, generar un kernel capaz de gestionar memoria entre diferentes tareas, correrlas de manera concurrente, y resolver las diferentes problemáticas que puedan surgir al momento de ejecución.
+El objetivo de este Trabajo Práctico es mostrar las variaciones en la performance que suceden al utilizar instrucciones SIMD en comparación con código C con diversos grados de optimización realizados por el compilador cuando se manejan grandes volúmenes de datos que requieren un procesamiento similar.
 
-Para ello utilizaremos las diversas herramientas que intel pone a nuestra disposición en modo protegido: Usaremos segmentación y paginación para controlar el privilegio con el que las tareas se ejecutarán, además de limitar lo que las tareas puedan 'ver' con un mapeo parcial de la memoria.
-Utilizaremos interrupciones del procesador que permitirán, tanto reaccionar de manera apropiada cuando se produzca un error en tiempo de ejecución, obtener input del teclado y gestionar un task manager que nos permita ejecutar tareas de manera concurrente.
+Para ello se realizarán distintos experimentos sobre cuatro filtros de fotos, Cropflip, Bandas, Sierpinski y Motion Blur, tanto en código assembler, que aproveche las instrucciones SSE brindadas para los procesadores de arquitectura Intel, como en código C, al que se le aplicarán los distintos flags de optimización -O0 (predeterminado), -O1, -O2 y -O3.
 
-En el presente informe, se detallará de manera más elaborada todo lo hecho para lograr el objetivo del trabajo práctico, así como cualquier decisión que se haya tomado en el código a tales fines. Para su mejor entendimiento, este informe se dividirá en ejercicios, que son pequeñas partes del trabajo, y todos juntos conforman al trabajo práctico en sí. 
+El primer filtro, Cropflip, se utilizará para mostrar cuanto mejora la performance al utilizar los registros XMM para transferir grandes cantidades de información.
 
-\section{Ejercicio 1: GDT Basica}
-En este primer ejercicio, decidimos completar las primeras $7$ posiciones de la gdt en un estado claramente inválido para que, en caso de usarlos erróneamente en algún momento, el error fuera visible. Luego, pusimos $4$ segmentos, dos para código de nivel 0 y 3, y dos para datos de nivel 0 y 3. Para un mayor entendimiento del código, se han usado defines, con nombres declarativos(por ejemplo, el segmento destinado a código de nivel $0$, se llama GDT_IDX_CDE_LVL_0). Estos segmentos direccionan los primeros 623 MB de memoria. También se ha declarado un segmento que describe el area de la pantalla en memoria que puede ser utilizado sólo por el kernel. Esto se utilizará en principio para escribir en el buffer de memoria, pero más avanzado el trabajo, será necesario mantener muchas estructuras de datos que deberán ser impresas por pantalla, por lo tanto se abandonará este método y se pasará a un código en C, más limpio y fácil de mantener. Dado que la convención C nos pide que todos los segmentos de datos apunten al mismo segmento, este segmento terminará quedando en desuso y se utilizará para escribir en pantalla tan sólo el segmento de datos de nivel 0. Después, para pasar a modo protegido, deshabilitamos las interrupciones, habilitamos el $A20$, cargamos la GDT, seteamos el bit PE del registro CR0 en $1$ para habilitar modo protegido, y luego hacemos un jump far a un segmento válido para pasar efectivamente a modo protegido. Una vez hecho el pasaje, seteamos todos los segmentos para que apunten al mismo descriptor de segmento (pedido por la convención c) y seteamos la base y puntero de la pila del kernel en la posición $0x27000$. Finalmente inicializamos en pantalla la interfaz gráfica que tendrá el juego, para lo cual utilizamos el segmento anteriormente mencionado.
+El segundo, tercer y cuarto filtro, se centrarán en la variación de performance (en comparación al código en C) al utilizar instrucciones SIMD, no sólo para transferir grandes volúmenes de datos sino también para procesarlos en forma paralela, es decir, realizar diversos cálculos (sumas, multiplicaciones, divisiones) tanto en representación de enteros como punto flotante.
 
-La antigua implementación para actualizar pantalla y un rudimentario print(char *) que todavía se utiliza en los primeros pasos de inicialización, pueden verse en $screen.asm$.
+\section{Preambulo}
 
-%\input{GDT/gdt.tex}
+\subsection{Calidad de las Mediciones}
+Para este experimento vamos a ver cómo se pueden ver afectados nuestros algoritmos frente a diversos factores de ruido e interferencias que podrían alterar nuestras mediciones.
 
-\section{Ejercicio 2: IDT Basica} 
-%\input{Interrupciones/int.tex}
+Para este experimento se utilizó un procesador Intel Atom, de 2 núcleos a 1.6 GHZ con Hyper-Threading, por lo que la cantidad de núcleos lógicos asciende a 4. Por otro lado, para que las pruebas sean mas concisas y exactas, se deshabilitó el scaling dinamico del CPU, ya que esto podría generar ruido innecesario en nuestras mediciones.
 
-En este ejercicio inicializamos la IDT, es decir, completamos las entradas necesarias para asociar diferentes rutinas a todas las excepciones del procesador. En principio, cada una de estas rutinas mostrará por pantalla qué tipo de problema se produjo e interrumpirá la ejecución. Luego de inicializada la IDT, deberemos cargarla desde el kernel. Posteriormente se modicarán estas rutinas para que en caso de que sea una tarea de nivel 3 se resuelva el problema y se desaloje a la tarea que lo produjo.
-En caso de producirse un error de kernel, se mostrará a qué tipo pertenece y en caso de tener, su code error.
+Procedimos a tomar 1000 mediciones para cada una de las versiones del cropflip, tanto con 4 loops corriendo en paralelo como sin los mismos. La medida de tiempo será a partir de este momento y a lo largo de todo el informe, la cantidad de ciclos de clock del procesador. Lo que se obtiene es el siguiente gráfico:
+\\
+\begin{figure}[h!]
+  \begin{center}
+  \includegraphics[scale=0.66]{Graficos1.4/1.3/per.jpg}
+  \label{nombreparareferenciar1}
+  \end{center}
+\end{figure}
+\\
 
-\section{Ejercicio 3: Paginación Basica}
-%\input{MMU/mmu.tex}
+Lo que se observa aquí es que al correr las pruebas con loops en segundo plano, la performance se ve afectada de forma negativa aumentando el tiempo de ejecución en por lo menos un 300 por ciento(como se ponia el simbolito?(ALE)). Con respecto a la varianza, se puede percibir fácilmente que el ruido la dispara considerablemente, es decir, aumenta abismalmente la dispersión de los datos, causando que estos sean menos fiables.
+Por los observado en este experimento, se ha tomada la decisión de que para cada experimento en el presente informe, se tomaran 1000 mediciones sin loops de fondo y quitando .(Es una buena justificacion porque hace que mis experimentos se vean mas chotos??(ALE))
 
-Inicializamos el directorio de páginas del kernel y las tablas de páginas necesarias para mapear las direcciones 0x00000000 a 0x003FFFFF usando identity mapping y para ello usamos un pequeño código en assembler que puede verse en $paging.asm$. En principio esta función era suficiente para el simple mapeo que requeríamos. Más adelante se optará por inicializar los directorios de páginas y tablas de páginas de una manera más clara y limpia utilizando $mmu.c$. El directorio de páginas del kernel se inicializará en la dirección $0x27000$ y las tablas de páginas a partir de la dirección $0x28000$. En este paso, se implementa una función llamada pedirPag, que dada la dirección de una página, la inicializa con todas sus entradas en cero, poniendo exclusivo cuidado en setear en 0 el bit de "presente" en cada caso, de manera que no sea utilizada hasta que se determine una dirección apropiada para la misma. 
-Luego de armado el directorio de páginas del kernel, seteamos el CR3 para que apunte al directorio de páginas y seteamos en 1 el bit correspondiente del registro CR0 para habilitar la paginación.
-
-\section{Ejercicio 4: Memory Management Unit}
-%\input{Paginacion/pag.tex}
-
-Aquí implementamos la Memory Management Unit dentro de $mmu.c$, para ello, primero la inicializamos seteando una variable "dirGlobal" la cual siempre apuntará a una dirección física libre de memoria que será utilizada para alojar una tabla o directorio de página según corresponda.
-
-Luego construimos una función para inicializar zombies ($mmu\_ inicializar\_ zombie$) que recibe como parámetros el código de la tarea y un arreglo de direcciones físicas(éste contiene como primer elemento a la posición en el mapa donde estamos inicializando el zombie, y en el resto del arreglo las 8 posiciones del mapa contiguas). En esta función creamos un nuevo directorio de páginas y una tabla de páginas para la tarea zombie y vinculamos la tabla de páginas del kernel a la primera entrada del directorio de páginas de la tarea zombie. Después, mapeamos cada dirección del arreglo a partir de la dirección virtual 0x8000000. 
-Dado que el area del mapa donde se ejecutarán los zombies no es alcanzable desde el kernel deberemos mapear la dirección física donde se encontrará el zombie en alguna dirección virtual que no utilicemos de manera tal que podamos copiar su código a esta dirección, y una vez copiado el código, desmapearlo.
-
-Para eso, agregamos al directorio de páginas actual una nueva tabla de páginas, mapeamos en ella una dirección que no se use (en este caso se decidió $0xDC4000$), copiamos el código, y por último desligamos dicha tabla del directorio de páginas.
-
-Para todo este proceso se implementarán varias funciones que facilitarán la tarea de mapear y desmapear tablas de páginas a direcciones reales y directorios de páginas a tablas, que más adelante cuando sea necesario remapear zombies, resultarán de suma utilidad. Estas funciones simplemente inicializarán entradas tanto en el directorio de paginas como en la tabla de paginas en estados validos.
-
-\section{Ejercicio 5: Interrupciones De Teclado/Reloj}
-%\input{Scheduler/scheduler.tex}
-
-Completamos las entradas necesarias en la IDT para asociar las rutinas correspondientes a las interrupciones del teclado, reloj y la interrupción de sofware 0x66. De momento estas funciones no tendrán mayor utilidad, el teclado sólo mostrará un mensaje por pantalla al presionarse una tecla y el reloj solo actualizará un reloj en la parte inferior derecha de la pantalla, pero estos comportamientos nos permiten poder probar que las interrupciones se realizan correctamente.
-
-De momento la interrupción 0x66 no realizará ninguna acción, se hablará de cómo fue implementada mas adelante en el TP.
-
-Posteriormente se reescribirán dichas rutinas para que, la del reloj sea utilizada para actualizar la pantalla y llamar al scheduler y cambiar a la tarea adecuada en cada tick del reloj, la del teclado se utilice para que las distintas teclas respondan a la función asignada y finalmente la interrupción 0x66 que se utilizará para el movimiento de las tareas zombies.
-
-\section{Ejercicio 6: TSS}
-
-En este ejercicio se implementará principalmente el archivo $tss.c$ el cual se encargará de administrar de buena manera todo lo que tenga que ver con el seteo apropiado de las tss a ser utilizadas.
-
-En principio se crea una entrada vacía que será donde guardemos la tss del kernel en el momento en que este deje de ser de utilidad.
-
-Como segundo paso se setea de manera apropiada las variables de la tarea idle en $inicializarTareaIdle()$.
-
-Luego se implementará una función $cargarTSS\_ zombie()$ que se encargue de inicializar 16 entradas en la gdt que corresponderán a cada uno de los zombies que pueden estar activos en el tablero. Esta función primero setea las entradas de la gdt para que apunten unívocamente a un tss a ser utilizada por un zombie y luego se setea la tss correspondiente también en estado válido para que queden listas para ser utilizadas por una tarea de nivel 3. Lo único que quedará sin setear será el CR3 de todas las tss, eso se determinará en el momento en que $mmu\_ inicializar\_ zombie$ nos dé un CR3 valido.
-
-Además, para simplificar las cosas, se tomará como que las primeras 8 tss son de los zombies del jugador A y las siguientes 8 entradas son del jugador B. De esa manera con tan solo tener el indice de que tss se está corriendo, podremos además determinar a que jugador pertenece.
-
-Más adelante se determinará que es mas facil para la implementación elegida, setear la TSS en el momento en que se crea el zombie, por lo que iniciar una nueva tss se convertirá en una función aparte.
-
-Aquí se puede ver la estructura final de nuestra GDT:
-
-\includegraphics[scale=0.29]{dibujos/dibujo4.jpg}\\
-
-\section{Ejercicio 7: Scheduler}
-
-En este ejercicio se implementa un scheduler simple que a partir de lo devuelto por la función $sched\_ proximo\_ indice()$ (implementada en $sched.c$). Por ahora y dado que no hay otras tareas para correr, este scheduler siempre retornará el valor de la tarea idle, pero más tarde se agregará la lógica para que además alterne entre zombies en el caso en que sea necesario.
-
-En este momento del TP, todavía no contamos con la lógica para saber donde se encuentra un zombie, cómo será la lógica para mapearlo, quién controlará si está o no activo, así que decidimos no seguir de manera estricta la guía proporcionada.
-
-\section{Ejercicio 8: El ensamble Final}
-
-LLegados a este punto tenemos un scheduler, una MMU, 16 TSSs, pero todavía falta implementar toda la lógica del juego propiamente dicho. Lo que se determina es que hace falta una estructura que mantenga las coordenadas en las que el zombie se encuentra, para asi facilitar el mapeo y la escritura en la pantalla. Además hace falta saber a que tipo pertenece cada zombie lanzado, tanto para poder copiar su código de manera efectiva como para poder mostrarlo en pantalla. Hace falta mantener de alguna manera las coordenadas del jugador A y B, los puntajes, la cantidad de zombies disponbiles.
-
-Se determina utilizar $game.c$ para todo ello. Allí se implementará toda la lógica del juego, las posiciones de los jugadores, los puntajes, los zombies activos, las coordenadas de los zombies y los zombes muertos/baba de zombie que pueda haber en el tablero. Dado que $game.c$ posee toda esta información, es lógico pensar que también aquí se maneje la pantalla ya que existe una correspondecia directa entre ambos.
-
-Se crean funciones para que ambos jugadores puedan moverse por la pantalla ($game\_ moverJugador()$), cambiar la clase del próximo zombie que será creado ($game\_ cambiarClase\_ atras()$ y $game\_ cambiarClase\_ adelante()$) y la funcionalidad de lanzar un zombie (ver $game\_ lanzar\_ zombi()$). Todas estas funciones estaran mapeadas por interrupciones de teclado a las teclas correspondientes.
-
-Cabe destacar la funcionalidad de $game\_ lanzar\_ zombi()$ ya que en esta función sucede una parte crítica del juego:
-
-En ella, se buscará primero en una arreglo previamente inicializado (Al cual se llamará $clockZombie$ ), si queda algun zombie "muerto" del jugador que corresponda, o lo que es lo mismo, existe una tarea para el jugador que corresponda que no este siendo utilizada. De ser el caso, se marca en este arreglo que la tarea ha empezado a estar "viva" (principalmente para que esta no pueda ser desplazada por otra tarea), se inicializan las coordenadas X e Y del tablero para el zombie y en base a ella se calculan las direcciones reales que el zombie ocupará.
-
-Una vez que tenemos las direcciones reales del zombie, se procede a inicializarlo llamando a la función $mmu\_ inicializar\_ zombie$ que como ya hemos dicho, mapea estas posiciones donde corresponde. Asi obtenemos el CR3 del zombie.
-
-Ahora limpiamos su tss, que esta unívocamente ligada al arreglo antes mencionado. Aquí es cuando notamos que no es necesario iniciar en $cargarTSS\_ zombie()$ las tss de antemano.
-
-Luego cargamos el CR3 del zombie en su TSS con $mapearCr3Tss()$ y así obtenemos una tss limpia para poder empezar a ejecutar el zombie.
-
-Este es el esquema grafico para ver como funcióna todo el sistema en conjunto:
-
-
-%\begin{figure}[h!]
-%  \begin{center}
-\includegraphics[scale=0.2]{dibujos/dibujo1.jpg}\\
-%  \end{center}
-%\end{figure}
 \newpage
 
-Notamos además que este arreglo de si los zombies están muertos o vivos puede resultar muy útil para indicarle al scheduler cuál tarea correr, así que se reimplementa el scheduler para que le pregunte a través de $game\_ proximo\_ zombie()$ cuál será el proximo zombie a ejecutar.
+\section{Experimentación}
 
-Para encapsular todo el comportamiento de escribir en el bufer de video y hacer mas claro el codigo se implementa todo el comportamiento de escribir en la pantalla en $game\_actualizarFrame()$. Dado que como hemos dicho, en $game.c$ esta guardado todo la informacion de jugadores y zombies, cada vez que la función es llamada, se refresca la pantalla por completo, rescribiendo tanto zombies como puntajes, posiciones de los jugaores, etc.
+\subsection{Desensamblado de código C y Optimización}
 
-Dada que esta función se debe ejecutar de manera periodica, se decide llamar a esta función desde la int $32$ para que con cada tic de clock del procesador se actualice la pantalla, aunque el framrate sería facilmente ajustable haciendo que en vez de llamarse con cada tic se llame cada $2, 4$ o lo que se decida.(Nota: nuestro juego corre a mas de 60 FPS, TAKE THAT PS4).
+Comenzamos analizando el código de Cropflip realizado en C.
 
-En el siguiente esquema se muestra de manera general como funcionará la int $32$:
+Este básicamente solo mueve datos de un lugar de la RAM a otros, sin afectar mayormente la imagen.
 
+Realizamos un objdump para ver el código que genera el compilador gcc. Al desensamblar el código pudimos observar, primero que nada, que C guarda todos los parámetros en la pila y además está escribiendo en memoria todas las variables locales utilizadas, lo cual es innecesario ya que pueden ser almacenadas en registros.
 
-%\begin{figure}[h!]
-%  \begin{center}
-\includegraphics[scale=0.9]{dibujos/dibujo2.jpg}\\
-%  \end{center}
-%\end{figure}
+También puede observarse que C utiliza saltos incondicionales, lo que puede sugerir que intenta sacar provecho al sistema de predicción de saltos.
+
+Ademas C genera, luego de la función, un montón de secciones que comienzan con debug_xxx. Estas secciones sirven para ser interpretadas por GDB u otros debuggers.
+
+Como ya dijimos, el código podría optimizarse para no realizar tantos accesos a memoria innecesarios guardando variables locales por ejemplo en registros, lo cual disminuiría el tiempo de ejecución.
+
+Luego de esto, procedemos a compilar el código utilizando el flag -O1, y nuevamente realizamos un objdump para ver el código desensamblado. Se observa que ahora el mismo solo realiza los accesos a memoria mínimos indispensables, utilizando los registros para guardar los datos. Además el código es más compacto, y resulta mas claro de leer. Además precalcula los valores que serán utilizados muchas veces, lo que aumenta la performance, principalmente en casos de instancias grandes.
+
+Los otros flags de optimización son -O2, -O3, -Og, -Os, -Ofast. También podemos encontrar los flags -msse, -msse2, -msse3, -mmmx, -m3dnow, pero al intentar compilar con varios de ellos vimos que gcc no utilizó instrucciones SIMD.
+
+Tres nombres de optimizaciones son: -fipa-profile, -fipa-reference ,-fmerge-constants .
+
 \newpage
 
+\section{Cropflip}
 
-Llegados a este punto ya es posible lanzar zombies al campo de juego, intercambiar sus tareas para que corran concurrentemente y ejecutarlos debidamente. Por supuesto, como la int $0x66$ todavía no tiene ninguna funcionalidad, el zombie permanece en su lugar.
+\subsection{Diferencias de performance en Cropflip}
+En el siguiente experimento se medirán las performances tanto de nuestro algoritmo en assembler, implementado para sacar provecho de las instrucciones SSE de Intel, como una versión alternativa hecha en C con diversos grados de optimización a cargo del compilador.
 
-Se procede a implementar esta funcionalidad en $game_move\_current\_zombi()$ . Se decide que la mejor manera de realizar esto es, que para mover un zombie, primero se muevan las coordenadas en X e Y del mismo hacia la direccion que correspona, luego, con una función apropiada, se determine para esa pocición y dependiendo de si es el jugador A o B, cual será el mapeo pertinente y se llame a una función $mmu\_remapearPaginasZombie()$ que tome las direcicones calculadas previamente y las remapee segun corresponda en el cr3 actual (El CR3 actual siempre es el del zombie que pidió la interrupción).
+El algoritmo de Cropflip en assembler es muy sencillo. Simplemente movemos 128-bits de la imagen a un xmm y de allí al destino, que previamente ha sido seteado para colocar los bits en el lugar correcto. De esta manera, podremos mover de una sola vez, 16 bytes, lo que corresponde a 4 píxels de la imagen.
 
-Ademas, se aprovecha $game\_move\_current_zombi()$ para que chequee las pociciones de X e Y para saber si el zombie esta en una posición valida y se anote un punto si llegó al otro lado del tablero.
+Dado que la cantidad de columnas es siempre múltiplo de 4, o sea, siempre tenemos 4 bytes para tomar, no es necesario chequear otros casos borde.
 
-El esquema de este funcionamiento es:
+Lo obtenido en los tests puede verse en el siguiente gráfico:
 
+\begin{figure}[h!]
+  \begin{center}
+	\includegraphics[scale=0.66]{Graficos1.4/crop/per.jpg}
+	\label{nombreparareferenciar5}
+  \end{center}
+\end{figure}
 
-%\begin{figure}[h!]
-%  \begin{center}
-\includegraphics[scale=0.9]{dibujos/dibujo3.jpg}\\
-%  \end{center}
-%\end{figure}
+\subsubsection{Resultados}
+
+Se percibe en el gráfico que la version SIMD del algoritmo de cropflip  y la version C con mayor grado de optimización son muy parecidas en promedio, aunque la varianza del segundo es mayor la del primero. Por otro lado, el programa SIMD tiene una mayor performance a las optimizaciones O1 y O2, y la comparación con O0 muestra que en promedio, es más de 8 veces más rápido.
+
+\subsubsection{Conclusiones}
+Creemos que la gran similitud de tiempos entre el programa versión SIMD y versión C con O3 se debe a que es un código muy simple, el cual sólo mueve datos de un lugar a otro. Sin embargo, la diferencia en la dispersión de datos de ambas tienden a hacer pensar que la versión SIMD es un poco más confiable en términos de performance.
+
 \newpage
 
-Muy bien, ya casi terminamos!. Ahora vemos como los zombies corren libres por el tablero de juego, cada uno con sus correspondientes paginas siendo remapeadas cada vez que llaman a la int $0x66$. Sin embargo el zombie mago entregado por la catedra, produce una general protection que al no ser manejada de la manera debida, detiene el juego.
+\subsection{cpu vs. bus de memoria en Cropflip}
 
-Se decide implementar en C una nueva función que será llamada por todas las interrupciónes $game\_error\_handling()$ la misma buscará que TSS causó la interrupción. A partir de eso, es trivial determinar que jugador y que zombie causaron ínterrupción. Luego, para ese zombie en particular se setea su ya mencionado $clockZombie$ en "muerto". De esa manera $game\_ proximo\_ zombie()$ no tomará a ese zombie como candidato y el scheduler no volverá a ejecutar esa TSS salvo que otro zombie se inicialice en ese espacio determiando. (Nota: En principio se intentó limpiar la TSS en este momento, pero limpiar la TSS de una tarea activa resultó ser una mala idea.)
+Para este experimento lo que hicimos fue agregar instrucciones aritméticas y ver como esto influía en el tiempo de ejecución.
 
-Luego de ser manejada la interrupción se vuelve a saltar a la tarea idle y se continúa con la ejecución normal.
+También hicimos lo mismo pero con instucciones de lectura-escritura en memoria. 
 
-Solo queda implementar el modo debug, para eso simplemente se decide implementar una interrupción de teclado para la tecla Y que ponga una dword en 1 en caso de que sea precionada. Luego, al llamarse a una interrupción, se llama a una función en C que imprime todo lo necesario por pantalla y luego se queda haciendo pooling del teclado hasta que la tecla Y sea precionada nuevamente.
+Probamos agregando $4$, $8$ y $16$ instrucciones de cada una por separado y comparamos las performance entre sí y con la versión original.
+
+Lo que obtuvimos fue lo siguiente:
+
+\begin{figure}[h!]
+  \begin{center}
+  \includegraphics[scale=0.66]{Graficos1.5/crop/per.png}
+  \label{nombreparareferenciar1}
+  \end{center}
+\end{figure}
+
+\subsubsection{Resultados}
+\subsubsection{Conclusiones}
+
+==conculsión!!!==
+(Lo que obtuvimos fue que en general, las operaciones de lectura producen una menor performance, mientras que en gral agregar operaciones aritmeticas mejora la performance. No se observa una dispersion de datos muy significativa(ALE))
+(Conclusiones: No se me ocurre un motivo logico para las operaciones aritmeticas, las operaciones de memoria tienen mas sentido, el caso 8 dios sabe... la unica herramienta que conozco es la cache, y no se como usarla para un argumento a favor... recomiendo poner que no tenemos idea porque sucedio esto(ALE))
+(ACAAAAAAAAAAAAAAAAAAAAAAA... dejo esto en blanco por si encontramos un mejor grafico, sino de ultima despues hago lo que puedo...)
+\newpage
+\section{Sierpinski}
+
+\subsection{Idea general del algoritmo}
+
+Ahora analizamos el algoritmo del Sierpinski. En este caso, el algoritmo ya es un poco más complejo. Necesitamos calcular para cada píxel un coeficiente diferente, que dependerá de la posición (i,j) de cada píxel.
+\\
+Luego para poder paralelizar de alguna manera el algoritmo en C y sacar provecho a los registros xmm, es necesario calcular 4 coeficientes a la vez y multiplicárselos a sus respectivos píxels.
+\\
+Luego la idea del algoritmo será algo así:
+
+\begin{itemize}
+\item En la sección data guardamos una constante con el valor 255 brodcasteado en punto flotante.
+\item Previo al ciclo, guardamos este valor en un registro.
+\item Ya dentro del ciclo, leemos 4 píxels y los guardamos en un xmm.
+\item A continuación calculamos de manera paralela para cada píxel el coeficiente correspondiente.
+\item Primero, realizamos la división de i por la cantidad de filas y j por la cantidad de columnas, para la cual previamente pasamos de entero a punto flotante.
+\item Multiplicamos ambos valores por 255 y luego convertimos a entero con truncamiento.
+\item Realizamos un xor entre ambos y despues, volvemos a convertir a punto flotante para dividir por 255.
+\item Ya con los coeficientes calculados, solo nos resta multiplicar cada uno por el píxel correspondiente.
+\item Para ello desempaquetamos cada byte de cada píxel leido a word, y luego de word a dword, para así convertirlo a punto flotante.
+\item Una vez hecha la conversión, brodcasteamos cada coeficiente para poder multiplicarlo por el píxel correspondiente.
+\item Luego convertimos a entero nuevamente y empaquetamos todo de dword a word y de word a byte.
+\item Y finalmente movemos los píxels procesados al destino.
+\end{itemize}
+
+\subsection{Diferencias de performance en Sierpinski}
+
+Los resultados comparativos de performance para este algoritmo comparado con uno desarrollado en C fueron los siguientes:
+
+\begin{figure}[h!]
+  \begin{center}
+  \includegraphics[scale=0.66]{Graficos1.4/sie/per.jpg}
+  \label{nombreparareferenciar7}
+  \end{center}
+\end{figure}
+
+\newpage
+\subsubsection{Resultados}
+Puede verse que en este caso nuestro modelo que toma y calcula de a 4 píxels utilizando instrucciones SIMD tiene una mejor performance que los demás. Es aproximadamente dos veces más rápido que la versión de C con O3, más de tres veces más rápido que O2 y O1 y más de 7 veces más veloz que O0, todo esto en promedio. Las varianzas son similares, y muy pequeñas.
+\subsubsection{Conclusiones}
+
+En base a los resultados, parecería que nuestro programa es claramente una mejor opción ante las implementaciones de C.
+
+\newpage
+\subsection{CPU vs. Bus de memoria en Sierpinski}
+
+Realizamos el mismo experimento que hicimos para cropflip, es decir, agregando instrucciones aritmeticas y de lectura escritura y comparando las performances.
+
+Graficando lo obtenido:
+
+\begin{figure}[h!]
+  \begin{center}
+  \includegraphics[scale=0.66]{Graficos1.5/sie/per.png}
+  \label{nombreparareferenciar1}
+  \end{center}
+\end{figure}
+
+\subsubsection{Resultados}
+Se observa que las operaciones aritmeticas y de memoria, provocan una disminucion de performance, y esta disminucion es mayor cuantas mas operaciones se agregan. Respecto a la varianza, estas son similares.
+
+\subsubsection{Conclusiones}
+
+Se puede ver que Sierpinski disminuye su performance de una manera similar cuando se le agregan más operaciones aritméticas o de lectura/escritura de memoria. Sin embargo, tomando como base lo que tarda el algoritmo por si mismo, pareciera que las operaciones de memoria lo afectan más en cuanto a tiempo que las operaciones aritmeticas.
+(CUIDADOOOOOOOOOOO. podría estar bueno rehacer este gráfico, sino tengo que poner chamuyo para el caso memoria = 8. el chamuyo sería el siguiente bicho, pero quisiera evitar ponerlo."Se observa que al insertar ocho operaciones de memoria, el tiempo da un poco menor que en el caso de 4. Esto se lo atribuimos al ruido, puesto que al tener una diferencia de tiempos tan pequeña(menor al 0.1 por ciento), este factor puede tomar gran importancia"... o algo asi.)
+
+\newpage
+\section{Bandas}
+\subsection{Idea general del algoritmo}
+Para el algoritmo de bandas se nos presenta otro desafío: debemos tomar los tres colores de la imagen(r,g,b), sumarlos, y luego comparar cada uno de ellos para ver si se encuentra en un rango determinado.
+\\
+Para resolver la primera problemática usaremos las instrucciones $phaddw$, que nos permitirá a través de una suma horizontal, sumar los valores r,g,b de manera cómoda solamente utilizando dos registros.
+\\
+El segundo problema será comparar estos valores obtenidos en la suma de una manera eficiente. Querríamos compararlos todos a la vez y a partir de esas comparaciones determinar que valores deberá ir en cada píxel. Esta se resolverá utilizando broadcasting. El algoritmo irá comparando en cada paso contra un valor y en caso de cumplirse una condición, restará donde corresponda.
+
+
+\begin{itemize}
+\item  En la sección data tenemos mascaras y constantes brodcasteadas que utilizaremos para hacer las comparaciones.
+\item  Ademas en esta sección tenemos una doble qword la cual usaremos para el shuffle final.
+\item  Previo al ciclo donde procesamos los píxels, movemos estos datos a registros xmm.
+\item  Ya una vez dentro del ciclo, leemos 4 píxels y los guardamos en un xmm.
+\item  Desempaquetamos los bytes a word para poder hacer la suma de las componentes de cada píxel sin irnos de la representación.
+\item  Hacemos dos sumas horizontales para obtener los cuatro valores  de b.
+\item  Luego utilizamos las mascaras para comparar en paralelo cada píxel con el b correspondiente y asignando el valor de rgb segun corresponda.
+\item  Nos queda en cada word de la parte baja de un xmm, los 4 valores que se asignaran a cada rgb de cada píxel.
+\item  Finalmente, empaquetamos estos valores para volver a byte y los shuffleamos para dejarlos en los lugares correspondiente y lo asignamos en el destino.
+\end{itemize}
+
+\subsection{Diferencias de performance en Bandas}
+
+Los resultados de los tiempos comparativos son los siguientes:
+
+\begin{figure}[h!]
+  \begin{center}
+  \includegraphics[scale=0.66]{Graficos1.4/ban/per.jpg}
+  \label{nombreparareferenciar9}
+  \end{center}
+\end{figure}
+
+\subsubsection{Resultados}
+En el gráfico se aprecia que el programa de ASM con SIMD tarda, en promedio, un poco menos de la mitad de tiempo que la implementación de C con O3. Tambien se observa que O2 y O3 son muy similares. Se ve que SIMD es tiene una mayor performance que O1 (poco menos de 3 veces), y nuevamente, es varias veces más veloz en promedio que O0. En cuanto a las varianzas, son similares y muy pequeñas.
+
+\subsubsection{Conclusiones}
+Nuestro algoritmo obtiene una performance mucho mayor a la del código sin optimizar, y una performance un poco mejor al del código C con el mayor grado de optimización. Las diferencias no son tan claras como en Sierpinski, sin embargo, siguen siendo rotundas.
+
+\newpage
+\subsection{Saltos condicionales}
+
+En este experimento veremos como afectan los saltos condicionales a la performance del codigo C compilado con -O1. Para ello lo que haremos es quitar los IFs del codigo dejando solo una banda, luego medir la performance y compararla con la version con saltos.
+
+\begin{figure}[h!]
+  \begin{center}
+  \includegraphics[scale=0.66]{Graficos3.1/per.jpg}
+  \label{nombreparareferenciar1}
+  \end{center}
+\end{figure}
+
+\subsubsection{Resultados}
+Como se puede ver en el gráfico del promedio, la versión de una sola banda tardó poco más de la mitad de tiempo con respecto a la versión original.(Esto esta hecho con 1000 mediciones=S?? (ALE))
+
+\subsubsection{Conclusiones}
+
+ Al ver que la version de una sola banda tardo en promedio menos que la version original, creemos que esta disminución en el tiempo de ejecución tiene que ver con la predicción de saltos del procesador. Esto se debe a que cuando hay un salto condicional, en principio el procesador no sabe a qué posición de memoria deberá dirigirse. Al haber removido estos saltos, tiene sentido que la performance se haya visto impactada de manera positiva
+
+\newpage
+\subsection{Motion Blur}
+\subsection{Idea general del algoritmo}
+Para este algoritmo por cada píxel se deben tomar 5 píxels, multiplicar cada uno de los colores por $0.2$ y luego sumarlos.
+\\
+Para ello debemos tener cuidado de tomar correctamente los casos borde y no aplicar motion blur donde no corresponde.
+\\
+Una idea general de cómo funciona el algoritmo en assembler es la siguiente:
+
+\begin{itemize}
+\item  Tenemos, en la sección datos, el valor $0.2$ brodcasteado que utilizaremos para realizar la multiplicación.
+\item  Previo al procesamiento de datos, guardamos en un xmm este valor.
+\item  Dentro del ciclo, para procesar el píxel (i,j) tomamos los 4 píxels de las filas $i-2$, $i-1$, $i$, $i+1$ e $i+2$ a partir de la columna $j-2$, $j-1$, $j$, $j+1$ y $j+2$, respectivamente, y almacenamos todo en registros.
+\item  Desempaquetamos todo a word para poder hacer la suma sin desbordar.
+\item  Luego de realizar las sumas, desempaquetamos a dwords para así poder convertir a punto flotante.
+\item  Con la conversión ya hecha, podemos multiplicar cada valor por $0.2$.
+\item  Convertimos a entero nuevamente y empaquetamos de dword a word y de word a byte.
+\item  Finalmente, copiamos los 4 píxels resultantes al destino. 
+\item  Cada vez que termino de recorrer una fila, pongo en negro los siguientes 4 píxels, y las dos primeras y últimas filas las pongo en negro aparte, fuera del ciclo.
+\end{itemize}
+
+\subsection{Diferencias de performance en Motion Blur}
+
+Al realizar el testing se obtuvieron los siguientes resultados:
+
+\begin{figure}[h!]
+  \begin{center}
+  \includegraphics[scale=0.66]{Graficos1.4/mbl/per.jpg}
+  \label{nombreparareferenciar11}
+  \end{center}
+\end{figure}
+
+\subsubsection{Resultados}
+Se aprecia en el gráfico que el código ASM con SIMD tiene un promedio de tiempo de ejecucion aproximadamente tres veces menor a la mayor optimización de C, y varias veces menor que O0. También se observa que O1, como O2 y O3 dan promedios de tiempo muy parecidos. Las varianzas son similares y muy pequeñas.
+
+\subsubsection{Conclusiones}
+
+En este caso nuestro algoritmo supera ampliamente incluso al código C con mayor grado de optimización, lo que hace pensar que es una mejor opción entre las propuestas.
+
+\newpage
+\section{Conclusiones y trabajo futuro}
+
+SIMD es una herramienta muy útil para mejorar la performance a la hora de manejar grandes cantidades de datos que requieren un mismo procesamiento, como imágenes o videos, y esto se vio reflejado ampliamente en los resultados de los experimentos realizados en este trabajo. Sin embargo si lo único que necesitamos realizar es un mero movimiento de datos, las diferencias se vuelven imperceptibles con respecto al grado de mayor optimización de C. Sin embargo, un gran poder conlleva una gran responsabilidad y un error de empaquetado o desempaquetado puede resultar en muchas horas de debugging, como por ejemplo desempaquetar dos veces la parte alta de un registro, en vez de desempaquetar la parte baja también.
+
+(ACLARACIONES GENEALES:4.2 cropflip rehacer el grafico hasta que de algo coherente, fijarse lo que dijo el chabon de la practica de ver que realmente este yendo a 1.6GHZ, en 5.3 sierpinski, solo si hay tiempo volver a hacer el grafico, asi no tenemos que tirarle culpas al ruido por las 8 operaciones de memoria, explicar los algoritmos, y el tp creo que ya estaria listo..)
 
 \end{document}
 
