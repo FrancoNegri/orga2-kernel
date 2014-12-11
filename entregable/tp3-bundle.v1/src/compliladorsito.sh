@@ -25,6 +25,6 @@ dd if=/dev/zero of=ArchivoDe4K3 count=1 bs=4k
 # copias el compilado al archivo
 dd if=ZombLinkeado3.o of=ArchivoDe4K3 count=1 bs=4k conv=notrunc
 
-make
+#make
 
-bochs -q
+#bochs -q
